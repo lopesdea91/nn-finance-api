@@ -25,6 +25,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('sign-up', [AuthControllerV1::class, 'signUp']);
         Route::post('sign-in', [AuthControllerV1::class, 'signIn']);
-        Route::post('sign-out', [AuthControllerV1::class, 'signOut']);
+
+        Route::middleware('auth:sanctum')->post('sign-out', [AuthControllerV1::class, 'signOut']);
     });
 });

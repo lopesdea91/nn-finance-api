@@ -2,10 +2,15 @@
 
 namespace App\Services;
 
-use App\Http\Requests\Auth\{AuthSignUpRequest, AuthSignRequest};
+use App\Http\Requests\Auth\{AuthSignInRequest, AuthSignUpRequest, AuthSignRequest};
 use App\Http\Resources\Auth\AuthSignUpResource;
 use App\Repository\UserRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\{
+    Auth,
+    Artisan,
+    // DB
+};
 
 class AuthService
 {
@@ -19,13 +24,29 @@ class AuthService
         return new AuthSignUpResource($create);
     }
 
-    public function signIn(AuthSignRequest $request)
+    static function signIn()
     {
-        dd('signIn');
+        $user   = Auth::user();
+        $token  =  $user->createToken($user->email)->plainTextToken;
+
+        // remove old token
+        // DB::table('personal_access_tokens')->where('name', $user->email)->delete();
+        // $user->tokens->each(function ($token) {
+        //     $token->delete();
+        // });
+
+        return [
+            "user"  => $user,
+            "token" => $token,
+        ];
     }
 
-    public function signOut(Request $request)
+    static function signOut()
     {
-        dd('signOut');
+        $user = Auth::user();
+
+        $user->tokens->each(function ($token) {
+            $token->delete();
+        });
     }
 }

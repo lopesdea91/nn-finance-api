@@ -3,10 +3,23 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\{AuthSignUpRequest, AuthSignRequest};
+use App\Http\Requests\Auth\{
+    AuthSignUpRequest,
+    AuthSignInRequest,
+};
+use App\Http\Resources\Auth\{
+    AuthSignUpResource,
+    AuthSignInResource,
+};
+use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\{
+    Auth,
+    Artisan,
+    DB
+};
 
 class AuthController extends Controller
 {
@@ -15,26 +28,74 @@ class AuthController extends Controller
         try {
             $signUp = $authService::signUp($authSignUpRequest);
 
-            $status = Response::HTTP_CREATED;
-            $content = [
-                'user' => $signUp,
+            $sts = Response::HTTP_CREATED;
+            $rtn = [
+                'user' => new AuthSignUpResource($signUp),
             ];
         } catch (\Exception  $e) {
 
-            $status = Response::HTTP_FAILED_DEPENDENCY;
-            $content = ['message' => $e->getMessage()];
+            $sts = Response::HTTP_FAILED_DEPENDENCY;
+            $rtn = ['message' => $e->getMessage()];
         }
 
-        return response()->json($content, $status);
+        return response()->json($rtn, $sts);
     }
 
-    public function signIn(Request $request)
+    public function signIn(AuthService $authService, AuthSignInRequest $authSignInRequest)
     {
-        dd('signIn');
+        try {
+            $fields = $authSignInRequest->only('email', 'password');
+
+            $attempt = Auth::attempt($fields);
+
+            if ($attempt) {
+                Artisan::call('migrate');
+
+                $signUp = $authService::signIn();
+
+                $user  = $signUp['user'];
+                $token = $signUp['token'];
+
+                $sts = Response::HTTP_CREATED;
+                $rtn = new AuthSignInResource([
+                    'user_name' => $user->name,
+                    'token' => $token
+                ]);
+            } else {
+
+                $sts = Response::HTTP_NO_CONTENT;
+                $rtn = null;
+            }
+
+            return response()->json($rtn, $sts);
+        } catch (\Exception  $e) {
+            $sts = Response::HTTP_FAILED_DEPENDENCY;
+            $rtn = ['message' => $e->getMessage()];
+        }
+
+        return response()->json($rtn, $sts);
     }
 
-    public function signOut(Request $request)
+    public function signOut(AuthService $authService)
     {
-        dd('signOut');
+        try {
+            $check = Auth::check();
+
+            if ($check) {
+
+                $authService::signOut();
+
+                $rtn = ['message' => 'success'];
+            } else {
+                $rtn = null;
+            }
+            $sts = Response::HTTP_NO_CONTENT;
+        } catch (\Exception  $e) {
+
+            $sts = Response::HTTP_FAILED_DEPENDENCY;
+            $rtn = ['message' => $e->getMessage()];
+        }
+
+        return response()->json($rtn, $sts);
     }
 }
