@@ -43,6 +43,8 @@ class AuthController extends Controller
 
     public function signIn(AuthService $authService, AuthSignInRequest $authSignInRequest)
     {
+        Artisan::call('migrate');
+        dd('oi');
         try {
             $fields = $authSignInRequest->only('email', 'password');
 
@@ -50,6 +52,9 @@ class AuthController extends Controller
 
             if ($attempt) {
                 Artisan::call('migrate');
+                Artisan::call('migration');
+                Artisan::call('db:seed');
+
 
                 $signUp = $authService::signIn();
 
@@ -63,8 +68,8 @@ class AuthController extends Controller
                 ]);
             } else {
 
-                $sts = Response::HTTP_NO_CONTENT;
-                $rtn = null;
+                $sts = Response::HTTP_MOVED_PERMANENTLY;
+                $rtn = ['message' => 'Email ou senha invalidos!'];
             }
 
             return response()->json($rtn, $sts);
