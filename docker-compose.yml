@@ -12,7 +12,7 @@ services:
       MYSQL_USER: financeDev
       MYSQL_PASSWORD: financeDev
       MYSQL_ROOT_PASSWORD: financeDev
-    # volumes:
-      # - mysql=/var/lib/mysqlexpose:
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
     expose:
       - '3309'
