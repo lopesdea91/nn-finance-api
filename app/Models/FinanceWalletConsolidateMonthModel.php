@@ -14,13 +14,16 @@ class FinanceWalletConsolidateMonthModel extends Model
     protected $fillable = [
         'year',
         'month',
+        'wallet_id',
+        // 'group',
+        // 'category',
         'balance',
-        'group',
-        'category',
+        'tag',
         'origin',
         'invoice',
-        'wallet_id',
     ];
 
     protected $hidden = [];
+
+    public $timestamps = false;
 }

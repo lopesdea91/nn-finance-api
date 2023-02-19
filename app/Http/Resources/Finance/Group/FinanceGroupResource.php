@@ -14,6 +14,19 @@ class FinanceGroupResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        $type = $this->type ? ['id' => $this->type->id, 'description' => $this->type->description,] : null;
+
+        $wallet = $this->wallet ? ['id' => $this->wallet->id, 'description' => $this->wallet->description,] : null;
+
+        return [
+            'id'            => $this->id,
+            'description'   => $this->description,
+            'enable'        => $this->enable,
+            'type_id'       => $this->type_id,
+            'type'          => $type,
+            'wallet_id'     => $this->wallet_id,
+            'wallet'        => $wallet,
+            // 'user_id'    => $this->user_id,
+        ];
     }
 }

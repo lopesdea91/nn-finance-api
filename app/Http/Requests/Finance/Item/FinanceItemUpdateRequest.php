@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance\Item;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceItemUpdateRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class FinanceItemUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return Auth::check();
     }
 
     /**

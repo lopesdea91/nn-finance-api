@@ -7,15 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinanceStatusModel extends Model
 {
-    // use HasFactory;
+	// use HasFactory;
 
-    protected $table = 'finance_status';
-    
-    protected $fillable = [
-        'id',
-        'description',
-    ];
+	protected $table = 'finance_status';
 
-    protected $hidden = [
-    ];
+	protected $fillable = [
+		'id',
+		'description',
+	];
+
+	protected $hidden = [];
 }

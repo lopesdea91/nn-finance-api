@@ -22,4 +22,19 @@ class FinanceCategoryModel extends Model
     ];
 
     protected $hidden = [];
+    
+	public function group()
+	{
+		return $this->hasOne("App\Models\FinanceGroupModel", 'id', 'group_id');
+	}
+
+	public function wallet()
+	{
+		return $this->hasOne("App\Models\FinanceWalletModel", 'id', 'wallet_id');
+	}
+
+	public function closure()
+	{
+		return $this->hasOne("App\Models\FinanceCategoryClosureModel", 'category_id', 'id');
+	}
 }

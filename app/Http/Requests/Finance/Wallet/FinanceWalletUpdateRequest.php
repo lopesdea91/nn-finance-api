@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance\Wallet;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceWalletUpdateRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class FinanceWalletUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return Auth::check();
     }
 
     /**
@@ -24,7 +25,10 @@ class FinanceWalletUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'description'   => 'required|string',
+            'json'          => 'nullable|string',
+            'enable'        => 'required|integer',
+            'panel'         => 'required|integer',
         ];
     }
 }

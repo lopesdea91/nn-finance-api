@@ -3,104 +3,126 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\{
-    AuthSignUpRequest,
-    AuthSignInRequest,
-};
 use App\Http\Resources\Auth\{
-    AuthSignUpResource,
-    AuthSignInResource,
+	AuthSignInResource,
 };
 use App\Http\Resources\UserResource;
+use App\Repository\UserRepository;
 use App\Services\AuthService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\{
-    Auth,
-    Artisan,
-    DB
+	Auth,
+	Artisan,
+	DB
 };
 
 class AuthController extends Controller
 {
-    public function signUp(AuthService $authService, AuthSignUpRequest $authSignUpRequest)
-    {
-        try {
-            $signUp = $authService::signUp($authSignUpRequest);
+	private $authService;
+	private $userService;
 
-            $sts = Response::HTTP_CREATED;
-            $rtn = [
-                'user' => new AuthSignUpResource($signUp),
-            ];
-        } catch (\Exception  $e) {
+	function __construct(AuthService $authService, UserService $userService)
+	{
+		$this->authService = $authService;
+		$this->userService = $userService;
+	}
 
-            $sts = Response::HTTP_FAILED_DEPENDENCY;
-            $rtn = ['message' => $e->getMessage()];
-        }
+	public function signUp(Request $request)
+	{
+		$request->validate([
+			'name'      => 'required',
+			'email'     => 'required',
+			'password'  => 'required',
+		]);
 
-        return response()->json($rtn, $sts);
-    }
+		$fields = $request->only(['name', 'email', 'password']);
 
-    public function signIn(AuthService $authService, AuthSignInRequest $authSignInRequest)
-    {
-        Artisan::call('migrate');
-        dd('oi');
-        try {
-            $fields = $authSignInRequest->only('email', 'password');
+		try {
+			$signUp = $this->userService->create($fields);
 
-            $attempt = Auth::attempt($fields);
+			$sts = Response::HTTP_CREATED;
+			$rtn = [
+				'user' => new UserResource($signUp),
+			];
+		} catch (\Exception  $e) {
 
-            if ($attempt) {
-                Artisan::call('migrate');
-                Artisan::call('migration');
-                Artisan::call('db:seed');
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+			$rtn = ['message' => $e->getMessage()];
+		}
 
+		return response()->json($rtn, $sts);
+	}
 
-                $signUp = $authService::signIn();
+	public function signIn(Request $request)
+	{
+		$request->validate([
+			'email'     => 'required',
+			'password'  => 'required',
+		]);
 
-                $user  = $signUp['user'];
-                $token = $signUp['token'];
+		$fields = $request->only(['email', 'password']);
 
-                $sts = Response::HTTP_CREATED;
-                $rtn = new AuthSignInResource([
-                    'user_name' => $user->name,
-                    'token' => $token
-                ]);
-            } else {
+		$existByEmail = $this->userService->existByEmail($fields['email']);
 
-                $sts = Response::HTTP_MOVED_PERMANENTLY;
-                $rtn = ['message' => 'Email ou senha invalidos!'];
-            }
+		try {
+			if (!$existByEmail) {
+				return response()->json(
+					[
+						'message' => 'Email não localizado!'
+					],
+					Response::HTTP_NOT_FOUND
+				);
+			}
 
-            return response()->json($rtn, $sts);
-        } catch (\Exception  $e) {
-            $sts = Response::HTTP_FAILED_DEPENDENCY;
-            $rtn = ['message' => $e->getMessage()];
-        }
+			$attempt = Auth::attempt($fields);
 
-        return response()->json($rtn, $sts);
-    }
+			if ($attempt) {
+				// Artisan::call('migrate');
+				// Artisan::call('migration');
+				// Artisan::call('db:seed');
 
-    public function signOut(AuthService $authService)
-    {
-        try {
-            $check = Auth::check();
+				$signUp = $this->authService->signIn();
 
-            if ($check) {
+				$sts = Response::HTTP_CREATED;
+				$rtn = new AuthSignInResource($signUp);
+			} else {
 
-                $authService::signOut();
+				$sts = Response::HTTP_MOVED_PERMANENTLY;
+				$rtn = [
+					'message' => 'Email ou senha invalidos!'
+				];
+			}
 
-                $rtn = ['message' => 'success'];
-            } else {
-                $rtn = null;
-            }
-            $sts = Response::HTTP_NO_CONTENT;
-        } catch (\Exception  $e) {
+			return response()->json($rtn, $sts);
+		} catch (\Exception  $e) {
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+			$rtn = ['message' => $e->getMessage()];
+		}
 
-            $sts = Response::HTTP_FAILED_DEPENDENCY;
-            $rtn = ['message' => $e->getMessage()];
-        }
+		return response()->json($rtn, $sts);
+	}
 
-        return response()->json($rtn, $sts);
-    }
+	public function signOut()
+	{
+		try {
+			$check = Auth::check();
+
+			if ($check) {
+				$this->authService->signOut();
+
+				$rtn = ['message' => 'success'];
+			} else {
+				$rtn = null;
+			}
+			$sts = Response::HTTP_NO_CONTENT;
+		} catch (\Exception  $e) {
+
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+			$rtn = ['message' => $e->getMessage()];
+		}
+
+		return response()->json($rtn, $sts);
+	}
 }

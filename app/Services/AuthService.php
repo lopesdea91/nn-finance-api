@@ -2,51 +2,42 @@
 
 namespace App\Services;
 
-use App\Http\Requests\Auth\{AuthSignInRequest, AuthSignUpRequest, AuthSignRequest};
+use App\Http\Requests\Auth\{AuthSignUpRequest};
 use App\Http\Resources\Auth\AuthSignUpResource;
 use App\Repository\UserRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\{
-    Auth,
-    Artisan,
-    // DB
+	Auth,
+	// Artisan,
+	DB
 };
 
 class AuthService
 {
-    static function signUp(AuthSignUpRequest $request)
-    {
-        $fields = $request->all();
-        $fields['type'] = 'client';
+	public function signIn()
+	{
+		$user   = Auth::user();
 
-        $create = UserRepository::create($fields);
+		// remove old token
+		// DB::table('personal_access_tokens')->where('name', $user->email)->delete();
+		// $user->tokens->each(function ($token) {
+		//     $token->delete();
+		// });
 
-        return new AuthSignUpResource($create);
-    }
+		$token  =  $user->createToken($user->email)->plainTextToken;
 
-    static function signIn()
-    {
-        $user   = Auth::user();
-        $token  =  $user->createToken($user->email)->plainTextToken;
+		return [
+			"token" 	=> $token,
+			// "user"  	=> $user,
+			// 'period' 	=> now()->format('Y-m')
+		];
+	}
 
-        // remove old token
-        // DB::table('personal_access_tokens')->where('name', $user->email)->delete();
-        // $user->tokens->each(function ($token) {
-        //     $token->delete();
-        // });
+	public function signOut()
+	{
+		$user = Auth::user();
 
-        return [
-            "user"  => $user,
-            "token" => $token,
-        ];
-    }
-
-    static function signOut()
-    {
-        $user = Auth::user();
-
-        $user->tokens->each(function ($token) {
-            $token->delete();
-        });
-    }
+		$user->tokens->each(function ($token) {
+			$token->delete();
+		});
+	}
 }

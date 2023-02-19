@@ -14,6 +14,25 @@ class FinanceCategoryResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        $group = $this->group ? ['id' => $this->group->id, 'description' => $this->group->description, 'type_id' => $this->group->type_id,] : null;
+
+        $type_id = $this->group ? $this->group->type->id : null;
+
+        $type = $this->group ? ['id' => $this->group->type->id, 'description' => $this->group->type->description,] : null;
+
+        $wallet = $this->wallet ? ['id' => $this->wallet->id, 'description' => $this->wallet->description,] : null;
+
+        return [
+            "id"            => $this->id,
+            "description"   => $this->description,
+            "enable"        => $this->enable,
+            "obs"           => $this->obs,
+            "group_id"      => $this->group_id,
+            "group"         => $group,
+            "type_id"       => $type_id,
+            "type"          => $type,
+            "wallet_id"     => $this->wallet_id,
+            "wallet"        => $wallet,
+        ];
     }
 }

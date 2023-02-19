@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance\List;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceListStoreRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class FinanceListStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return Auth::check();
     }
 
     /**

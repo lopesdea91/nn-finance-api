@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance\InvoiceItem;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceInvoiceItemStoreRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class FinanceInvoiceItemStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return Auth::check();
     }
 
     /**

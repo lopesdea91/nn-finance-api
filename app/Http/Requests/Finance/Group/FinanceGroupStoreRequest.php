@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance\Group;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceGroupStoreRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class FinanceGroupStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return Auth::check();
     }
 
     /**
@@ -24,7 +25,10 @@ class FinanceGroupStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'description'   => 'required|string',
+            'enable'        => 'required|integer',
+            'type_id'       => 'nullable|integer',
+            'wallet_id'     => 'required|integer',
         ];
     }
 }

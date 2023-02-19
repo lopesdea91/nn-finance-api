@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance\WalletConsolidateMonth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceWalletConsolidateMonthUpdateRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class FinanceWalletConsolidateMonthUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return Auth::check();
     }
 
     /**

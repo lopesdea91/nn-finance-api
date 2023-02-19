@@ -3,16 +3,16 @@
 namespace App\Repository;
 
 use App\Models\UserModel;
-use Illuminate\Support\Facades\Hash;
+use App\Repository\Base\CrudRepository;
 
-class UserRepository
+class UserRepository extends CrudRepository
 {
-    static public function create($fields)
+    protected $model;
+    protected $fields = ['name', 'email', 'password', 'type'];
+    // protected $relationships = [''];
+
+    public function __construct()
     {
-        return UserModel::create([
-            "name"      => $fields['name'],
-            "email"     => $fields['email'],
-            "password"  => Hash::make($fields['password']),
-        ]);
+        $this->model = new UserModel();
     }
 }

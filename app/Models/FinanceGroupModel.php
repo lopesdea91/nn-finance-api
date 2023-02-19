@@ -17,8 +17,18 @@ class FinanceGroupModel extends Model
         'enable',
         'type_id',
         'wallet_id',
-        'user_id',
+        'user_id'
     ];
 
     protected $hidden = [];
+
+    public function type()
+    {
+        return $this->hasOne("App\Models\FinanceTypeModel", 'id', 'type_id');
+    }
+
+    public function wallet()
+    {
+        return $this->hasOne("App\Models\FinanceWalletModel", 'id', 'wallet_id');
+    }
 }

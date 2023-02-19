@@ -28,14 +28,12 @@ class CreateFiles extends Command
         // Artisan::call('make:model FinanceListModel');
         // Artisan::call('make:model FinanceListItemModel');
 
-
         /* 
         # BASE
         // Artisan::call('make:request Finance/X/FinanceXStoreRequest');
         // Artisan::call('make:request Finance/X/FinanceXUpdateRequest');
         // Artisan::call('make:resource Finance/X/FinanceXResource');
         // Artisan::call('make:resource Finance/X/FinanceXCollection');
-
 
         Artisan::call('make:request Finance/Wallet/FinanceWalletStoreRequest');
         Artisan::call('make:request Finance/Wallet/FinanceWalletUpdateRequest');
@@ -106,7 +104,27 @@ class CreateFiles extends Command
         Artisan::call('make:request Finance/ListItem/FinanceListItemUpdateRequest');
         Artisan::call('make:resource Finance/ListItem/FinanceListItemResource');
         Artisan::call('make:resource Finance/ListItem/FinanceListItemCollection');
+
+        Artisan::call('make:controller v1/FinanceTypeController');
+        Artisan::call('make:resource Finance/Type/FinanceTypeResource');
+        Artisan::call('make:resource Finance/Type/FinanceTypeCollection');
+
+        Artisan::call('make:controller v1/FinanceStatusController');
+        Artisan::call('make:resource Finance/Status/FinanceStatusResource');
+        Artisan::call('make:resource Finance/Status/FinanceStatusCollection');
+
+        Artisan::call('make:controller v1/FinanceOriginTypeController');
+        Artisan::call('make:resource Finance/OriginType/FinanceOriginTypeResource');
+        Artisan::call('make:resource Finance/OriginType/FinanceOriginTypeCollection');
+
+        Artisan::call('make:controller v1/FinanceItemController');
+        Artisan::call('make:request Finance/Item/FinanceItemStoreRequest');
+        Artisan::call('make:request Finance/Item/FinanceItemUpdateRequest');
+        Artisan::call('make:resource Finance/Item/FinanceItemResource');
+        Artisan::call('make:resource Finance/Item/FinanceItemCollection');
         */
+
+
 
         return Command::SUCCESS;
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Finance\Origin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class FinanceOriginUpdateRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class FinanceOriginUpdateRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return Auth::check();
     }
 
     /**
@@ -24,7 +25,11 @@ class FinanceOriginUpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'description'   => 'required|string',
+            'enable'        => 'required|integer',
+            'type_id'       => 'nullable|integer',
+            'parent_id'     => 'required|integer',
+            'wallet_id'     => 'required|integer',
         ];
     }
 }

@@ -6,6 +6,8 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class FinanceOriginCollection extends ResourceCollection
 {
+    public $collects = 'App\Http\Resources\Finance\Origin\FinanceOriginResource';
+
     /**
      * Transform the resource collection into an array.
      *
@@ -14,6 +16,6 @@ class FinanceOriginCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return $this->resource;
     }
 }
