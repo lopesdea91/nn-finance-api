@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-	private $nameTable = 'finance_invoice';
+    private $nameTable = 'finance_invoice';
 
     /**
      * Run the migrations.
@@ -20,11 +20,11 @@ return new class extends Migration
             $table->double('total', 8, 2);
             $table->date('date');
             $table->enum('enable', [1, 0])->default(1);
-            $table->foreignId('origin_id')->nullable()->default(null)->foreign('origin_id')->references('id')->on('finance_origin');
-            $table->foreignId('status_id')->foreign('status_id')->references('id')->on('finance_status');
-            $table->foreignId('wallet_id')->foreign('wallet_id')->references('id')->on('finance_wallet');
-            $table->foreignId('user_id')->foreign('user_id')->references('id')->on('users');
-            $table->foreignId('item_id')->nullable()->foreign('item_id')->references('id')->on('finance_item');
+            $table->foreignId('origin_id')->nullable()->default(null)->references('id')->on('finance_origin');
+            $table->foreignId('status_id')->references('id')->on('finance_status');
+            $table->foreignId('wallet_id')->references('id')->on('finance_wallet');
+            $table->foreignId('user_id')->references('id')->on('users');
+            $table->foreignId('item_id')->nullable()->references('id')->on('finance_item');
         });
     }
 

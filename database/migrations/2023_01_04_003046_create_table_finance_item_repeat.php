@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    private $nameTable = 'finance_wallet_consolidate_month';
+    private $nameTable = 'finance_item_repeat';
 
     /**
      * Run the migrations.
@@ -16,16 +16,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create($this->nameTable, function (Blueprint $table) {
-            $table->id('id');
-            $table->integer('year');
-            $table->integer('month');
-            $table->foreignId('wallet_id')->references('id')->on('finance_wallet');
-            $table->json('balance');
-            $table->json('tag');
-            // $table->json('group');
-            // $table->json('category');
-            $table->json('origin');
-            $table->json('invoice');
+            $table->id();
+            $table->foreignId('item_id')->references('id')->on('finance_item');
+            $table->integer('repeat');
         });
     }
 

@@ -15,16 +15,16 @@ return new class extends Migration
      */
     public function up()
     {
-		Schema::create($this->nameTable, function (Blueprint $table) {
-			$table->id('id');
-			$table->string('description');
-			$table->enum('enable', [1, 0])->default(1);
-			$table->string('obs', 200);
-			$table->foreignId('group_id')->nullable()->foreign('group_id')->references('id')->on('finance_group')->onDelete('cascade');
-			$table->foreignId('wallet_id')->foreign('wallet_id')->references('id')->on('finance_wallet')->onDelete('cascade');
-			$table->foreignId('user_id')->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-			$table->timestamps();
-        });
+        // Schema::create($this->nameTable, function (Blueprint $table) {
+        //     $table->id('id');
+        //     $table->string('description');
+        //     $table->enum('enable', [1, 0])->default(1);
+        //     $table->string('obs', 200);
+        //     $table->foreignId('group_id')->nullable()->references('id')->on('finance_group');
+        //     $table->foreignId('wallet_id')->references('id')->on('finance_wallet');
+        //     $table->foreignId('user_id')->references('id')->on('users');
+        //     $table->timestamps();
+        // });
     }
 
     /**
