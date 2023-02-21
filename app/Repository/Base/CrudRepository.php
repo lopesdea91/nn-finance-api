@@ -61,7 +61,18 @@ abstract class CrudRepository
 
     $model = $this->queryModel($model);
 
-    $model->where($where)->orderByRaw($order);
+    foreach ($where as $currentValue) {
+      $key      = $currentValue[0];
+      $operator = $currentValue[1];
+      $value    = $currentValue[2];
+
+      if (is_array($value)) {
+        $model->whereIn($key, $value);
+      } else {
+        $model->where($key, $operator,  $value);
+      }
+    }
+    $model->orderByRaw($order);
 
     foreach ($whereHas as $key => $has) {
       $model->whereHas($key, $has);

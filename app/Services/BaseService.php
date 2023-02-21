@@ -17,7 +17,6 @@ class BaseService
 
     // public function all()
     // {
-    //     dd('oi');
     //     return $this->repository->all();
     // }
     // static function id()

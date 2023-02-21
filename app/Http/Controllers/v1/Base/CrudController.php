@@ -34,14 +34,21 @@ class CrudController extends Controller
 
 				$paginate = $this->service->paginate($args);
 
-				$sts = Response::HTTP_OK;
-				$rtn = [
-					"items"     => new $this->collection($paginate->items()),
-					"page"      => $paginate->currentPage(),
-					"total"     => $paginate->total(),
-					"limit"     => $paginate->perPage(),
-					"lastPage"  => $paginate->lastPage(),
-				];
+				$count = $paginate->count();
+
+				if ($count) {
+					$sts = Response::HTTP_OK;
+					$rtn = [
+						"items"     => new $this->collection($paginate->items()),
+						"page"      => $paginate->currentPage(),
+						"total"     => $paginate->total(),
+						"limit"     => $paginate->perPage(),
+						"lastPage"  => $paginate->lastPage(),
+					];
+				} else {
+					$rtn = null;
+					$sts = Response::HTTP_NO_CONTENT;
+				}
 			} else {
 				$rtn = new $this->collection($this->service->all($args));
 				$sts = Response::HTTP_OK;

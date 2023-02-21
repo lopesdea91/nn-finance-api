@@ -29,6 +29,8 @@ class FinanceOriginRepository extends CrudRepository
 		if (key_exists('parent_id',   $query))  $where[] = ['parent_id',   '=',    $query['parent_id']];
 		if (key_exists('wallet_id',   $query))  $where[] = ['wallet_id',   '=',    $query['wallet_id']];
 
+		unset($query['_paginate']);
+
 		return parent::paginate([
 			'query' => $query,
 			'where' => $where,

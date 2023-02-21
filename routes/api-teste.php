@@ -92,8 +92,4 @@ Route::get('teste', function () {
   //             "until_month" => "2023-04"
   //         ]
   //     ]);
-
-  //     dd(
-  //         FinanceItemModel::all()
-  //     );
 });

@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\FinanceItemController as FinanceItemControllerV1;
 
 Route::prefix('item')->group(function () {
+  Route::get('/{id}/status/{statusId}', [FinanceItemControllerV1::class, 'status']);
+
   Route::get('/{id}/enabled', [FinanceItemControllerV1::class, 'enabled']);
   Route::get('/{id}/disabled', [FinanceItemControllerV1::class, 'disabled']);
 

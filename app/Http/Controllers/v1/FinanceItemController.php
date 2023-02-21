@@ -83,7 +83,7 @@ class FinanceItemController extends CrudController
 		try {
 			new $this->resource($this->service->store($fields));
 
-			$rtn = ['message' => "{$this->nameSingle} criado!"];
+			$rtn = ['message' => "{$this->nameSingle} criado(a)!"];
 			$sts = Response::HTTP_CREATED;
 		} catch (\Throwable $e) {
 
@@ -134,7 +134,7 @@ class FinanceItemController extends CrudController
 		try {
 			new $this->resource($this->service->update($id, $fields));
 
-			$rtn = ['message' => "{$this->nameSingle} atualizado!"];
+			$rtn = ['message' => "{$this->nameSingle} atualizado(a)!"];
 			$sts = Response::HTTP_CREATED;
 		} catch (\Throwable $e) {
 
@@ -167,6 +167,25 @@ class FinanceItemController extends CrudController
 
 			$rtn = null;
 			$sts = Response::HTTP_NO_CONTENT;
+		} catch (\Throwable $e) {
+
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+			$rtn = ['message' => $e->getMessage()];
+		}
+
+		return response()->json($rtn, $sts);
+	}
+
+	public function status($id, $statusId)
+	{
+		if (!$this->service->exist($id))
+			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
+
+		try {
+			$this->service->status($id, $statusId);
+
+			$rtn = ['message' => "{$this->nameSingle} atualizado(a)"];
+			$sts = Response::HTTP_OK;
 		} catch (\Throwable $e) {
 
 			$sts = Response::HTTP_FAILED_DEPENDENCY;

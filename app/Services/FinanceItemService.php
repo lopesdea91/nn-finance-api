@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
 use App\Repository\FinanceItemRepository;
-use App\Repository\FinanceWallerConsolidateMonthRepository;
 use App\Services\Base\BaseService;
 use App\Services\FinanceWalletConsolidateMonthService;
 
@@ -20,6 +19,7 @@ class FinanceItemService extends BaseService
   public function paginate($args)
   {
     $user_id = Auth::user()->id;
+    $tag_ids = key_exists('tag_ids', $args['query']) ? $args['query']['tag_ids'] : false;
 
     return $this->repository->paginate([
       'query' => $args['query'],
@@ -27,6 +27,11 @@ class FinanceItemService extends BaseService
       'whereHas' => [
         'wallet' => function ($q) use ($user_id) {
           $q->where('user_id', $user_id);
+        },
+        'tags' => function ($q) use ($tag_ids) {
+          if ($tag_ids) {
+            $q->whereIn('tag_id', $tag_ids);
+          }
         }
       ],
     ]);
@@ -128,6 +133,25 @@ class FinanceItemService extends BaseService
       'wallet_id' => $fields['wallet_id'],
     ]);
 
+
+    return $update;
+  }
+
+  public function status($id, $statusId)
+  {
+    $where = [
+      'id' => $id,
+    ];
+
+    $update = $this->repository->update($where, [
+      "status_id"  => $statusId
+    ]);
+
+    // update consolidate
+    (new FinanceWalletConsolidateMonthService)->consolidate([
+      'period'    => $update->date,
+      'wallet_id' => $update->wallet_id,
+    ]);
 
     return $update;
   }

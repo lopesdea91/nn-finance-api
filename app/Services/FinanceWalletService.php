@@ -22,7 +22,7 @@ class FinanceWalletService extends BaseService
 		return $this->repository->paginate([
 			'query' => $args['query'],
 			'where' => [
-				'user_id' => $user_id
+				['user_id', '=', $user_id]
 			],
 			'whereHas' => [],
 		]);
