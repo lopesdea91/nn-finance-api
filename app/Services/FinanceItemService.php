@@ -84,10 +84,12 @@ class FinanceItemService extends BaseService
     $store->tags()->sync([]);
     $store->tags()->sync($fields['tag_ids']);
 
-    $store->obs()->create([
-      'obs'     => $fields['obs'],
-      'item_id' => $store->id
-    ]);
+    if (key_exists('obs', $fields)) {
+      $store->obs()->create([
+        'obs'     => $fields['obs'],
+        'item_id' => $store->id
+      ]);
+    }
 
     if ($isRepeat) {
       if ($repeatTimes) {
@@ -116,15 +118,17 @@ class FinanceItemService extends BaseService
     $update->tags()->sync([]);
     $update->tags()->sync($fields['tag_ids']);
 
-    if ($update->obs) {
-      $update->obs()->update([
-        'obs'     => $fields['obs'],
-      ]);
-    } else {
-      $update->obs()->create([
-        'obs'     => $fields['obs'],
-        'item_id' => $update->id
-      ]);
+    if (key_exists('obs', $fields)) {
+      if ($update->obs) {
+        $update->obs()->update([
+          'obs'     => $fields['obs'],
+        ]);
+      } else {
+        $update->obs()->create([
+          'obs'     => $fields['obs'],
+          'item_id' => $update->id
+        ]);
+      }
     }
 
     // update consolidate

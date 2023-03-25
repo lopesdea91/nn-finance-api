@@ -51,7 +51,7 @@ class FinanceItemController extends CrudController
 		$request->validate([
 			"value"       => 'required|numeric',
 			"date"        => 'required|string',
-			"obs"         => 'required|string',
+			// "obs"         => 'required|string',
 			"sort"        => 'required|integer',
 			"enable"      => 'required|integer',
 			"enable"      => 'required|integer',
@@ -102,7 +102,7 @@ class FinanceItemController extends CrudController
 		$request->validate([
 			"value"       => 'required|numeric',
 			"date"        => 'required|string',
-			"obs"         => 'required|string',
+			// "obs"         => 'required|string',
 			"sort"        => 'required|integer',
 			"enable"      => 'required|integer',
 			"enable"      => 'required|integer',

@@ -23,7 +23,7 @@ class FinanceTagModel extends Model
 
 	public function type()
 	{
-		return $this->hasOne("App\Models\FinanceOriginTypeModel", 'id', 'type_id');
+		return $this->hasOne("App\Models\FinanceTypeModel", 'id', 'type_id');
 	}
 
 	public function wallet()

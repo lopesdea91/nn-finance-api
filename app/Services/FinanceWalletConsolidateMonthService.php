@@ -137,18 +137,19 @@ class FinanceWalletConsolidateMonthService extends BaseService
       $origin_description = $item['origin']['description'];
 
       ## if not exit tag in data_consolidate_base
-      if (!key_exists($tag_descriptions, $this->data_consolidate_base['tag'])) {
+      if ($isOk && !key_exists($tag_descriptions, $this->data_consolidate_base['tag'])) {
         $this->data_consolidate_base['tag'][$tag_descriptions] = [
           "tag_key"           => $item['tag_key'],
           "description"       => $tag_descriptions,
           'value'             => 0,
+          'type'             => 0,
         ];
 
         ksort($this->data_consolidate_base['tag']);
       }
 
       ## if not exit origin in data_consolidate_base
-      if (!key_exists($origin_description, $this->data_consolidate_base['origin'])) {
+      if ($isOk && !key_exists($origin_description, $this->data_consolidate_base['origin'])) {
         $this->data_consolidate_base['origin'][$origin_description] = [
           "id"                => $item['origin']['id'],
           "description"       => $origin_description,
@@ -163,10 +164,12 @@ class FinanceWalletConsolidateMonthService extends BaseService
         if ($isReceita) {
           $revenueOk += $value;
 
+          $this->data_consolidate_base['tag'][$tag_descriptions]['type'] = 1;
           $this->data_consolidate_base['origin'][$origin_description]['value'] += $value;
         } else {
           $expenseOk += $value;
 
+          $this->data_consolidate_base['tag'][$tag_descriptions]['type'] = 2;
           $this->data_consolidate_base['origin'][$origin_description]['value'] -= $value;
         }
 
