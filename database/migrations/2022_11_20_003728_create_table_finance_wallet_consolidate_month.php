@@ -21,9 +21,8 @@ return new class extends Migration
             $table->integer('month');
             $table->foreignId('wallet_id')->references('id')->on('finance_wallet');
             $table->json('balance');
+            $table->json('status');
             $table->json('tag');
-            // $table->json('group');
-            // $table->json('category');
             $table->json('origin');
             $table->json('invoice');
         });

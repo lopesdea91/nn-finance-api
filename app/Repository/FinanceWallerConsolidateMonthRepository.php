@@ -25,6 +25,7 @@ class FinanceWallerConsolidateMonthRepository extends CrudRepository
       'month'     => $data['month'],
       'wallet_id' => $data['wallet_id'],
       "balance"   => json_encode($data["balance"]),
+      "status"    => json_encode($data["status"]),
       "tag"       => json_encode($data["tag"]),
       "origin"    => json_encode($data["origin"]),
       "invoice"   => json_encode($data["invoice"]),

@@ -41,7 +41,7 @@ class FinanceWalletController extends CrudController
 		$this->walletConsolidateMonthService = new FinanceWalletConsolidateMonthService;
 	}
 
-	public function getConsolidateMonth(Request $request)
+	public function consolidateMonth(Request $request)
 	{
 		$request->validate([
 			'period'   	=> 'required|string',
@@ -70,6 +70,7 @@ class FinanceWalletController extends CrudController
 				$content = $results->first();
 
 				$consolidate_base["balance"] = json_decode($content['balance']);
+				$consolidate_base["status"]  = json_decode($content['status']);
 				$consolidate_base["tag"]     = json_decode($content['tag']);
 				$consolidate_base["origin"]  = json_decode($content['origin']);
 				$consolidate_base["invoice"] = json_decode($content['invoice']);
@@ -80,6 +81,7 @@ class FinanceWalletController extends CrudController
 				// "month"     => $consolidate_base['month'],
 				// "wallet_id" => $consolidate_base['wallet_id'],
 				"balance"   => $consolidate_base['balance'],
+				"status"    => $consolidate_base['status'],
 				"tag"       => $consolidate_base['tag'],
 				"origin"    => $consolidate_base['origin'],
 				"invoice"   => $consolidate_base['invoice'],
@@ -94,7 +96,7 @@ class FinanceWalletController extends CrudController
 		return response()->json($rtn, $sts);
 	}
 
-	public function consolidateMonth(Request $request)
+	public function processConsolidateMonth(Request $request)
 	{
 		$request->validate([
 			'period'   	=> 'required|string',
@@ -112,6 +114,29 @@ class FinanceWalletController extends CrudController
 		} catch (\Throwable $e) {
 			$sts = Response::HTTP_FAILED_DEPENDENCY;
 			$rtn = ['message' => $e->getMessage()];
+		}
+
+		return response()->json($rtn, $sts);
+	}
+
+	public function periodsData(Request $request)
+	{
+		$request->validate([
+			'period'   	=> 'required|string',
+			'wallet_id' => 'required|integer',
+			'format' 		=> 'string',
+		]);
+
+		$fields = $request->only(['period', 'wallet_id', 'format']);
+
+		try {
+			$rtn = [
+				'items' => $this->service->periodsData($fields)
+			];
+			$sts = Response::HTTP_OK;
+		} catch (\Throwable $e) {
+			$rtn = ['message' => $e->getMessage()];
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
 		}
 
 		return response()->json($rtn, $sts);
