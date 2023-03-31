@@ -72,7 +72,7 @@ class FinanceWalletService extends BaseService
 	}
 	public function periodsData($fields)
 	{
-		$period    = $fields['period'];
+		// $period    = $fields['period'];
 		$wallet_id = $fields['wallet_id'];
 
 		$items = FinanceItemModel::where([

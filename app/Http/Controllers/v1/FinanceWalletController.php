@@ -122,7 +122,7 @@ class FinanceWalletController extends CrudController
 	public function periodsData(Request $request)
 	{
 		$request->validate([
-			'period'   	=> 'required|string',
+			// 'period'   	=> 'required|string',
 			'wallet_id' => 'required|integer',
 			'format' 		=> 'string',
 		]);
