@@ -22,9 +22,9 @@ class FinanceWalletModel extends Model
     protected $hidden = [
         'user_id'
     ];
-    
-	public function user()
-	{
-		return $this->hasOne("App\Models\UserModel", 'id', 'user_id');
-	}
+
+    public function user()
+    {
+        return $this->hasOne("App\Models\UserModel", 'id', 'user_id');
+    }
 }

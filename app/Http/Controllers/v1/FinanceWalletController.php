@@ -23,13 +23,13 @@ class FinanceWalletController extends CrudController
 	];
 	protected $validateUpdate = [
 		'description'   => 'required|string',
-		'json'          => 'nullable|string',
+		// 'json'          => 'nullable|string',
 		'enable'        => 'required|integer',
 		'panel'         => 'required|integer',
 	];
 	protected $fieldsUpdate = [
 		'description',
-		'json',
+		// 'json',
 		'enable',
 		'panel',
 	];
@@ -70,10 +70,11 @@ class FinanceWalletController extends CrudController
 				$content = $results->first();
 
 				$consolidate_base["balance"] = json_decode($content['balance']);
+				$consolidate_base["composition"] = json_decode($content['composition']);
+				$consolidate_base["originTransactional"]  = json_decode($content['originTransactional']);
+				$consolidate_base["invoice"] = json_decode($content['invoice']);
 				$consolidate_base["status"]  = json_decode($content['status']);
 				$consolidate_base["tag"]     = json_decode($content['tag']);
-				$consolidate_base["origin"]  = json_decode($content['origin']);
-				$consolidate_base["invoice"] = json_decode($content['invoice']);
 			}
 
 			$rtn = [
@@ -81,10 +82,11 @@ class FinanceWalletController extends CrudController
 				// "month"     => $consolidate_base['month'],
 				// "wallet_id" => $consolidate_base['wallet_id'],
 				"balance"   => $consolidate_base['balance'],
-				"status"    => $consolidate_base['status'],
-				"tag"       => $consolidate_base['tag'],
-				"origin"    => $consolidate_base['origin'],
+				"composition" => $consolidate_base['composition'],
+				"originTransactional" => $consolidate_base['originTransactional'],
 				"invoice"   => $consolidate_base['invoice'],
+				"tag"       => $consolidate_base['tag'],
+				"status"    => $consolidate_base['status'],
 			];
 
 			$sts = Response::HTTP_OK;

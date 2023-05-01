@@ -8,42 +8,31 @@ use Illuminate\Support\Facades\Auth;
 
 class FinanceWalletConsolidateMonthService extends BaseService
 {
+  // 'ok'      => [
+  //   'value'   => 0,
+  //   'percent' => 0,
+  // ],
+  // 'pending' => [
+  //   'value'   => 0,
+  //   'percent' => 0,
+  // ],
   protected $repository;
   private $periodCurrent;
   private $wallet_id;
   private $items = [];
   public $data_consolidate_base = [
     'balance' => [
-      'expense'   => [ // despesas
-        'value' => 0,
-        // 'ok'      => [
-        //   'value'   => 0,
-        //   'percent' => 0,
-        // ],
-        // 'pending' => [
-        //   'value'   => 0,
-        //   'percent' => 0,
-        // ],
-      ],
-      'revenue'   => [ // saldo
-        'value' => 0,
-        // 'ok'      => [
-        //   'value'   => 0,
-        //   'percent' => 0,
-        // ],
-        // 'pending' => [
-        //   'value'   => 0,
-        //   'percent' => 0,
-        // ],
-      ],
-      'available' => 0, // saldo - despesas (ok)
-      'estimate'  => 0, // saldo - despesas (not ok)
+      'revenue'   => 0, // Receitas (1)
+      'expense'   => 0, // Despesas (2)
+      'available' => 0, // Sobra    (1-2)   despesas (ok)
+      'estimate'  => 0, // Estimado (1-2-3) despesas (not ok)
     ],
-    'status'  => [],
-    'tag'     => [],
-    'origin'  => [],
+    'composition' => [],
+    'originTransactional' => [],
     'invoice' => [],
-    // 'group'    => [],
+    'tag' => [],
+    'status' => [],
+    // 'group'   => [],
     // 'category' => [],
   ];
 
@@ -61,12 +50,20 @@ class FinanceWalletConsolidateMonthService extends BaseService
     $this->wallet_id      = intval($query['wallet_id']);
 
     $this->getItems();
+
+    ## computations
     $this->balance();
+    // $this->composition();
+    $this->originTransitional();
+    // $this->originCredit();
     $this->status();
     $this->tag();
-    $this->origin();
     // $this->list();
     // $this->invoice();
+
+    ## formats
+    $this->originTransitionalFormat();
+
     $this->saveData();
   }
 
@@ -122,10 +119,10 @@ class FinanceWalletConsolidateMonthService extends BaseService
       }
     }
 
-    $this->data_consolidate_base['balance']['revenue']['value'] = $revenueOk;
-    $this->data_consolidate_base['balance']['expense']['value'] = $expenseOk;
+    $this->data_consolidate_base['balance']['revenue']   = $revenueOk;
+    $this->data_consolidate_base['balance']['expense']   = $expenseOk;
     $this->data_consolidate_base['balance']['available'] = $revenueOk - $expenseOk;
-    $this->data_consolidate_base['balance']['estimate'] = $revenueOk - $expenseOk - $expenseNotOk;
+    $this->data_consolidate_base['balance']['estimate']  = $revenueOk - $expenseOk - $expenseNotOk;
 
     unset($key, $item, $isOk, $isReceita, $value, $revenueOk, $expenseOk, $expenseNotOk);
   }
@@ -226,34 +223,93 @@ class FinanceWalletConsolidateMonthService extends BaseService
     // unset($key, $item, $isOk, $tag_key);
   }
 
-  private function origin()
+  private function originTransitional()
   {
-    foreach ($this->items as $key => $item) {
+    $originCreditCard = 2;
+
+    $itemsOriginTrasactionals = array_filter($this->items, function ($item) use ($originCreditCard) {
+      $origin_id = $item['origin']['id'];
+
+      return $origin_id !== $originCreditCard;
+    });
+
+    foreach ($itemsOriginTrasactionals as $key => $item) {
       $isOk               = $item['status_id'] === 1;
       $isReceita          = $item['type_id'] === 1;
       $origin_description = $item['origin']['description'];
 
       ## if not exit ORIGIN in data_consolidate_base
-      if (!key_exists($origin_description, $this->data_consolidate_base['origin'])) {
-        $this->data_consolidate_base['origin'][$origin_description] = [
-          "id"                => $item['origin']['id'],
-          "description"       => $origin_description,
-          'sum'             => 0,
+      if (!key_exists($origin_description, $this->data_consolidate_base['originTransactional'])) {
+        $this->data_consolidate_base['originTransactional'][$origin_description] = [
+          "id"          => $item['origin']['id'],
+          "description" => $origin_description,
+          'sum'         => 0,
+          'revenue'     => 0,
+          'expense'     => 0,
+          'average'     => 0,
         ];
 
-        ksort($this->data_consolidate_base['origin']);
+        ksort($this->data_consolidate_base['originTransactional']);
       }
 
       if ($isReceita) {
-        $this->data_consolidate_base['origin'][$origin_description]['sum'] += $item['value'];
+        $this->data_consolidate_base['originTransactional'][$origin_description]['revenue'] += $item['value'];
+        $this->data_consolidate_base['originTransactional'][$origin_description]['sum'] += $item['value'];
       } else {
-        $this->data_consolidate_base['origin'][$origin_description]['sum'] -= $item['value'];
+        $this->data_consolidate_base['originTransactional'][$origin_description]['expense'] += $item['value'];
+        $this->data_consolidate_base['originTransactional'][$origin_description]['sum'] -= $item['value'];
       }
     }
 
-    $this->data_consolidate_base['origin']  = array_values($this->data_consolidate_base['origin']);
+    $this->data_consolidate_base['originTransactional']  = array_values($this->data_consolidate_base['originTransactional']);
 
-    unset($key, $item, $isOk, $isReceita, $origin_description);
+    unset($originCreditCard, $itemsOriginTrasactionals, $origin_id, $key, $item, $isOk, $isReceita, $origin_description);
+  }
+
+  private function originTransitionalFormat()
+  {
+    foreach ($this->data_consolidate_base['originTransactional'] as $index => $origin) {
+      $revenue = $origin['revenue'];
+      $expense = $origin['expense'];
+
+      if ($revenue > 0) {
+        $this->data_consolidate_base['originTransactional'][$index]['average'] = number_format(($expense / $revenue) * 100, 2, '.');
+      }
+      if ($revenue == 0) {
+        $this->data_consolidate_base['originTransactional'][$index]['average'] = "-" . number_format($expense, 2, '.');
+      }
+    }
+  }
+
+  private function originCredit()
+  {
+    $originCreditCard = 2;
+    $itemsOriginCredits = array_filter($this->items, function ($item) use ($originCreditCard) {
+      $origin_id = $item['origin']['id'];
+
+      return $origin_id === $originCreditCard;
+    });
+
+    foreach ($itemsOriginCredits as $key => $item) {
+      $origin_description = $item['origin']['description'];
+
+      ## if not exit ORIGIN in data_consolidate_base
+      if (!key_exists($origin_description, $this->data_consolidate_base['originCredit'])) {
+        $this->data_consolidate_base['originCredit'][$origin_description] = [
+          "id"          => $item['origin']['id'],
+          "description" => $origin_description,
+          'sum'         => 0,
+        ];
+
+        ksort($this->data_consolidate_base['originCredit']);
+      }
+
+      $this->data_consolidate_base['originCredit'][$origin_description]['sum'] += $item['value'];
+    }
+
+    $this->data_consolidate_base['originCredit']  = array_values($this->data_consolidate_base['originCredit']);
+
+    unset($originCreditCard, $itemsOriginTrasactionals, $origin_id, $key, $item, $origin_description);
   }
 
   // private function groupingItemsByTag()
@@ -311,14 +367,14 @@ class FinanceWalletConsolidateMonthService extends BaseService
   //     }
 
   //     ## if not exit origin in data_consolidate_base
-  //     if ($isOk && !key_exists($origin_description, $this->data_consolidate_base['origin'])) {
-  //       $this->data_consolidate_base['origin'][$origin_description] = [
+  //     if ($isOk && !key_exists($origin_description, $this->data_consolidate_base['originTransactional'])) {
+  //       $this->data_consolidate_base['originTransactional'][$origin_description] = [
   //         "id"                => $item['origin']['id'],
   //         "description"       => $origin_description,
   //         'value'             => 0,
   //       ];
 
-  //       ksort($this->data_consolidate_base['origin']);
+  //       ksort($this->data_consolidate_base['originTransactional']);
   //     }
 
   //     ## apply value / sum value in tag, origin
@@ -327,12 +383,12 @@ class FinanceWalletConsolidateMonthService extends BaseService
   //         $revenueOk += $value;
 
   //         $this->data_consolidate_base['tag'][$tag_descriptions]['type'] = 1;
-  //         $this->data_consolidate_base['origin'][$origin_description]['value'] += $value;
+  //         $this->data_consolidate_base['originTransactional'][$origin_description]['value'] += $value;
   //       } else {
   //         $expenseOk += $value;
 
   //         $this->data_consolidate_base['tag'][$tag_descriptions]['type'] = 2;
-  //         $this->data_consolidate_base['origin'][$origin_description]['value'] -= $value;
+  //         $this->data_consolidate_base['originTransactional'][$origin_description]['value'] -= $value;
   //       }
 
   //       $this->data_consolidate_base['tag'][$tag_descriptions]['value'] += $value;
@@ -347,7 +403,7 @@ class FinanceWalletConsolidateMonthService extends BaseService
   //   $this->data_consolidate_base['balance']['estimate'] = $revenueOk - $expenseOk - $expenseNotOk;
 
   //   $this->data_consolidate_base['tag']     = array_values($this->data_consolidate_base['tag']);
-  //   $this->data_consolidate_base['origin']  = array_values($this->data_consolidate_base['origin']);
+  //   $this->data_consolidate_base['originTransactional']  = array_values($this->data_consolidate_base['originTransactional']);
   //   $this->data_consolidate_base['invoice'] = array_values($this->data_consolidate_base['invoice']);
 
   //   unset($this->items);
@@ -367,10 +423,11 @@ class FinanceWalletConsolidateMonthService extends BaseService
         'month'     => $this->periodCurrent->format('m'),
         'wallet_id' => $this->wallet_id,
         'balance'   => $this->data_consolidate_base['balance'],
-        'status'    => $this->data_consolidate_base['status'],
-        'tag'       => $this->data_consolidate_base['tag'],
-        'origin'    => $this->data_consolidate_base['origin'],
+        'composition' => $this->data_consolidate_base['composition'],
+        'originTransactional' => $this->data_consolidate_base['originTransactional'],
         'invoice'   => $this->data_consolidate_base['invoice'],
+        'tag'       => $this->data_consolidate_base['tag'],
+        'status'    => $this->data_consolidate_base['status'],
       ]
     );
 

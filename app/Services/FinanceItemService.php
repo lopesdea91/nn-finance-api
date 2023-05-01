@@ -78,7 +78,6 @@ class FinanceItemService extends BaseService
     // if ($repeatTimes && !$repeatMonths)
     //   throw new ApiExceptionResponse("a chave until_month é obrigatório em repeat_options quando cadastrar um ITEM como REPEAT");
     // }
-
     $store = $this->repository->create($fields);
 
     $store->tags()->sync([]);
@@ -100,10 +99,10 @@ class FinanceItemService extends BaseService
       }
     }
 
-    (new FinanceWalletConsolidateMonthService)->consolidate([
-      'period'    => $fields['date'],
-      'wallet_id' => $fields['wallet_id'],
-    ]);
+    // (new FinanceWalletConsolidateMonthService)->consolidate([
+    //   'period'    => $fields['date'],
+    //   'wallet_id' => $fields['wallet_id'],
+    // ]);
 
     return $store;
   }

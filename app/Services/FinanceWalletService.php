@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\FinanceItemModel;
-use App\Models\FinanceWalletModel;
 use App\Services\Base\BaseService;
 use App\Repository\FinanceWalletRepository;
 use Illuminate\Support\Facades\Auth;
@@ -63,9 +62,9 @@ class FinanceWalletService extends BaseService
 
 		$updateField = [
 			'description' => $fields['description'],
-			'json'        => $fields['json'],
-			'enable'      => $fields['enable'],
-			'panel'       => $fields['panel'],
+			// 'json'        => $fields['json'],
+			'enable'      => "{$fields['enable']}",
+			'panel'       => "{$fields['panel']}",
 		];
 
 		return $this->repository->update($where, $updateField);
