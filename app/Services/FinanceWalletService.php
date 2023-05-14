@@ -69,7 +69,7 @@ class FinanceWalletService extends BaseService
 
 		return $this->repository->update($where, $updateField);
 	}
-	public function periodsData($fields)
+	public function getPeriodsData($fields)
 	{
 		// $period    = $fields['period'];
 		$wallet_id = $fields['wallet_id'];

@@ -8,7 +8,7 @@ use App\Repository\Base\CrudRepository;
 class FinanceWalletRepository extends CrudRepository
 {
 	protected $model;
-	protected $fields = ['id', 'description', 'json', 'enable', 'panel', 'user_id'];
+	protected $fields = ['id', 'description', 'json', 'composition', 'enable', 'panel', 'user_id'];
 	protected $relationships = ['user'];
 
 	public function __construct()

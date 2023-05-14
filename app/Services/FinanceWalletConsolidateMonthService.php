@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\FinanceWalletConsolidateMonthModel;
 use App\Repository\FinanceWallerConsolidateMonthRepository;
+use App\Repository\FinanceWalletRepository;
 use App\Services\Base\BaseService;
 use Illuminate\Support\Facades\Auth;
 
@@ -53,7 +55,7 @@ class FinanceWalletConsolidateMonthService extends BaseService
 
     ## computations
     $this->balance();
-    // $this->composition();
+    $this->composition();
     $this->originTransitional();
     // $this->originCredit();
     $this->status();
@@ -125,6 +127,81 @@ class FinanceWalletConsolidateMonthService extends BaseService
     $this->data_consolidate_base['balance']['estimate']  = $revenueOk - $expenseOk - $expenseNotOk;
 
     unset($key, $item, $isOk, $isReceita, $value, $revenueOk, $expenseOk, $expenseNotOk);
+  }
+
+  private function composition()
+  {
+    $composition = [];
+
+    // busca composição mes
+    $consolidateMonth = FinanceWalletConsolidateMonthModel::where([
+      'year'      => $this->periodCurrent->format('Y'),
+      'month'     => $this->periodCurrent->format('m'),
+      'wallet_id' => $this->wallet_id,
+    ])->first();
+
+    // valida 'composição mes' caso não existe usa 'composição carteira'
+    if ($consolidateMonth) {
+      $compositionMonth = json_decode($consolidateMonth->composition, true);
+
+      $keyCompositionHasValue = !!count($compositionMonth);
+
+      if ($keyCompositionHasValue) {
+        $composition = $compositionMonth;
+      } else {
+        $carteira = (new FinanceWalletRepository)->id($this->wallet_id)->toArray();
+
+        $composition = json_decode($carteira['composition'], true);
+      }
+    }
+    $expense = $this->data_consolidate_base['balance']['expense'];
+
+    // return when expense was not positive
+    if ($expense <= 0) {
+      return;
+    }
+
+    $data_composition = [];
+
+    // create data_composition by tag_id of item
+    foreach ($composition as $item) {
+      $tag_id     = $item['tag_id'];
+      $percentage = $item['percentage'];
+
+      if (!key_exists($tag_id, $data_composition)) {
+        $data_composition[$tag_id] = [
+          'tag_id' => $tag_id,
+          'percentage' => intval($percentage),
+          'percentage_current' => 0,
+          'value' => 0,
+        ];
+      }
+    }
+
+    // apure each item
+    foreach ($this->items as $item) {
+      $isOk  = $item['status_id'] === 1;
+      $value = $item['value'];
+      $tags  = $item['tags'];
+
+      // continue when has tags
+      if (count($tags) === 0 || !$isOk) {
+        continue;
+      }
+
+      $tag = reset($tags);
+      $tag_id = $tag['id'];
+
+      if (key_exists($tag_id, $data_composition)) {
+        $data_composition[$tag_id]['value'] = $data_composition[$tag_id]['value'] + $value;
+        $n = ($data_composition[$tag_id]['value'] / $expense) * 100;
+        $data_composition[$tag_id]['percentage_current'] = number_format($n, 2, '.');
+      }
+    }
+
+    $this->data_consolidate_base['composition'] = array_values($data_composition);
+
+    unset($carteira, $composition, $expense, $data_composition, $item, $tag_id, $percentage, $isOk, $value, $tags, $tag);
   }
 
   private function status()

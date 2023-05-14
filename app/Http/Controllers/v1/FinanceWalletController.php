@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\v1\Base\CrudController;
+use App\Repository\FinanceWalletRepository;
 use App\Services\FinanceWalletConsolidateMonthService;
 use App\Services\FinanceWalletService;
 use Illuminate\Http\Request;
@@ -41,7 +42,7 @@ class FinanceWalletController extends CrudController
 		$this->walletConsolidateMonthService = new FinanceWalletConsolidateMonthService;
 	}
 
-	public function consolidateMonth(Request $request)
+	public function getConsolidateMonth(Request $request)
 	{
 		$request->validate([
 			'period'   	=> 'required|string',
@@ -121,7 +122,7 @@ class FinanceWalletController extends CrudController
 		return response()->json($rtn, $sts);
 	}
 
-	public function periodsData(Request $request)
+	public function getPeriodsData(Request $request)
 	{
 		$request->validate([
 			// 'period'   	=> 'required|string',
@@ -133,8 +134,34 @@ class FinanceWalletController extends CrudController
 
 		try {
 			$rtn = [
-				'items' => $this->service->periodsData($fields)
+				'items' => $this->service->getPeriodsData($fields)
 			];
+			$sts = Response::HTTP_OK;
+		} catch (\Throwable $e) {
+			$rtn = ['message' => $e->getMessage()];
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+		}
+
+		return response()->json($rtn, $sts);
+	}
+
+	public function composition($id, Request $request)
+	{
+		$request->validate([
+			'composition' => 'required|string',
+		]);
+
+		$fields = $request->only(['composition']);
+
+		try {
+			(new FinanceWalletRepository)->update(
+				[
+					'id'	=> $id,
+				],
+				$fields
+			);
+
+			$rtn = ['message' => "Composição atualizada!"];
 			$sts = Response::HTTP_OK;
 		} catch (\Throwable $e) {
 			$rtn = ['message' => $e->getMessage()];

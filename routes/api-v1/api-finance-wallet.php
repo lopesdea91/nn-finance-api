@@ -4,8 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\v1\FinanceWalletController as FinanceWalletControllerV1;
 
 Route::prefix('wallet')->group(function () {
-  Route::get('periods-data', [FinanceWalletControllerV1::class, 'periodsData']);
-  Route::get('consolidate-month', [FinanceWalletControllerV1::class, 'consolidateMonth']);
+  Route::post('/{id}/composition', [FinanceWalletControllerV1::class, 'composition']);
+  Route::get('periods-data', [FinanceWalletControllerV1::class, 'getPeriodsData']);
+  Route::get('consolidate-month', [FinanceWalletControllerV1::class, 'getConsolidateMonth']);
   Route::post('consolidate-month', [FinanceWalletControllerV1::class, 'processConsolidateMonth']);
 
   Route::get('/{id}/enabled', [FinanceWalletControllerV1::class, 'enabled']);
