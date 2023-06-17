@@ -13,8 +13,6 @@ class FinanceWalletModel extends Model
 
     protected $fillable = [
         'description',
-        'json',
-        'composition',
         'enable',
         'panel',
         'user_id',

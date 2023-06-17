@@ -4,14 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FinanceItemObsModel extends Model
+class FinanceWalletConsolidationTagsModel extends Model
 {
-	protected $table = 'finance_item_obs';
+	protected $table = 'finance_wallet_consolidation_tags';
 
 	protected $fillable = [
-		"id",
-		"obs",
-		"item_id",
+		'id',
+		'tag_id',
+		'consolidation_tag_id',
 	];
 
 	protected $hidden = [];

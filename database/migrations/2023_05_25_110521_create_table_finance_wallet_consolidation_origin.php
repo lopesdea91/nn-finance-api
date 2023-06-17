@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-	private $nameTable = 'finance_wallet';
+	private $nameTable = 'finance_wallet_consolidation_origin';
 
 	/**
 	 * Run the migrations.
@@ -16,13 +16,13 @@ return new class extends Migration
 	public function up()
 	{
 		Schema::create($this->nameTable, function (Blueprint $table) {
-			$table->id('id');
-			$table->string('description');
-			// $table->json('json');
-			$table->enum('enable', [1, 0])->default(1);
-			$table->enum('panel', [1, 0])->default(0);
-			$table->foreignId('user_id')->references('id')->on('users');
-			$table->timestamps();
+			$table->id();
+			$table->double('sum', 8, 2);
+			$table->double('revenue', 8, 2)->nullable();
+			$table->double('expense', 8, 2)->nullable();
+			$table->double('average', 8, 2)->nullable();
+			$table->foreignId('origin_id')->references('id')->on('finance_origin');
+			$table->integer('consolidation_id')->references('id')->on('finance_wallet_consolidation_month');
 		});
 	}
 

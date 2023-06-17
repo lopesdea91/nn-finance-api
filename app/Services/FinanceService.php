@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Finance\{
 	Origin\FinanceOriginCollection,
@@ -13,14 +12,12 @@ use App\Http\Resources\Finance\{
 	Wallet\FinanceWalletCollection,
 	Wallet\FinanceWalletResource,
 };
-use App\Repository\{
-	FinanceOriginRepository,
-	FinanceOriginTypeRepository,
-	FinanceStatusRepository,
-	FinanceTagRepository,
-	FinanceTypeRepository,
-	FinanceWalletRepository,
-};
+use App\Models\FinanceOriginModel;
+use App\Models\FinanceOriginTypeModel;
+use App\Models\FinanceStatusModel;
+use App\Models\FinanceTagModel;
+use App\Models\FinanceTypeModel;
+use App\Models\FinanceWalletModel;
 
 class FinanceService
 {
@@ -29,45 +26,66 @@ class FinanceService
 		$user = Auth::user();
 		$user_id = $user->id;
 
-		$typeAll      	= (new FinanceTypeRepository)->all()->get();
+		$typeAll = FinanceTypeModel::select('id', 'description')->get();
 
-		$statusAll      = (new FinanceStatusRepository)->all()->get();
+		$statusAll = FinanceStatusModel::select('id', 'description')->get();
 
-		$originTypeAll  = (new FinanceOriginTypeRepository)->all()->orderBy('description')->get();
+		$originTypeAll = FinanceOriginTypeModel::select('id', 'description')->orderBy('description')->get();
 
-		$walletPanel    = (new FinanceWalletRepository)->all([
-			"where" => [
-				'user_id' =>  $user_id,
-				'panel'		=> 1
-			]
-		])->get();
+		$walletPanel = FinanceWalletModel::select(
+			'description',
+			'enable',
+			'panel',
+			'user_id',
+		)->where([
+			'user_id' =>  $user_id,
+			'panel'		=> 1
+		])
+			->first();
 
-		$wallet         = (new FinanceWalletRepository)->all([
-			"where" => [
-				'user_id' =>  $user_id
-			]
-		])->orderBy('description')->get();
+		$wallet = FinanceWalletModel::select(
+			'id',
+			'description',
+			'enable',
+			'panel',
+			'user_id',
+		)->where([
+			'user_id' =>  $user_id
+		])
+			->orderBy('description')
+			->get();
 
-		$origin         = (new FinanceOriginRepository)->all([
-			"whereHas" => [
-				'wallet'     => function ($q) use ($user_id) {
-					$q->where('user_id', $user_id);
-				}
-			]
-		])->orderBy('description')->get();
+		$origin = FinanceOriginModel::select(
+			'id',
+			'description',
+			'enable',
+			'type_id',
+			'parent_id',
+			'wallet_id',
+		)
+			->whereHas('wallet', function ($q) use ($user_id) {
+				$q->where('type_id', '=', 2);
+			})
+			->orderBy('description')
+			->get();
 
-		$tag 						= (new FinanceTagRepository)->all([
-			"whereHas" => [
-				'wallet'     => function ($q) use ($user_id) {
-					$q->where('user_id', $user_id);
-				}
-			]
-		])->orderBy('description')->get();
+		$tag = FinanceTagModel::select(
+			"id",
+			"description",
+			"enable",
+			"type_id",
+			"wallet_id",
+		)
+			->whereHas('wallet', function ($q) use ($user_id) {
+				$q->where('user_id', $user_id);
+			})
+			->orderBy('description')
+			->get();
 
 		$data = [];
-		$data['user']['id'] 		= $user->id;
-		$data['user']['name'] 	= $user->name;
-		$data['user']['email']	= $user->email;
+		// $data['user']['id'] 		= $user->id;
+		// $data['user']['name'] 	= $user->name;
+		// $data['user']['email']	= $user->email;
 
 		$data['wallet_panel'] 	= $walletPanel->count() ? new FinanceWalletResource($walletPanel->first()) : null;
 		$data['wallet']       	= new FinanceWalletCollection($wallet);
@@ -77,7 +95,7 @@ class FinanceService
 		$data['tag']       			= new FinanceTagCollection($tag);
 		$data['type']         	= new FinanceTypeCollection($typeAll);
 		$data['status']       	= new FinanceStatusCollection($statusAll);
-		$data['originType']   	= new FinanceOriginTypeCollection($originTypeAll);
+		$data['origin_type']   	= new FinanceOriginTypeCollection($originTypeAll);
 
 		return $data;
 	}
