@@ -3,32 +3,19 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Auth\{
-	AuthSignInResource,
-};
 use App\Http\Resources\UserResource;
-use App\Repository\UserRepository;
-use App\Services\AuthService;
-use App\Services\UserService;
+use App\Models\UserModel;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\{
 	Auth,
 	Artisan,
-	DB
+	DB,
+	Hash
 };
 
 class AuthController extends Controller
 {
-	private $authService;
-	private $userService;
-
-	function __construct(AuthService $authService, UserService $userService)
-	{
-		$this->authService = $authService;
-		$this->userService = $userService;
-	}
-
 	public function signUp(Request $request)
 	{
 		$request->validate([
@@ -40,12 +27,24 @@ class AuthController extends Controller
 		$fields = $request->only(['name', 'email', 'password']);
 
 		try {
-			$signUp = $this->userService->create($fields);
+			$existByEmail = !!UserModel::where(["email" => $fields['email']])->count();
 
-			$sts = Response::HTTP_CREATED;
-			$rtn = [
-				'user' => new UserResource($signUp),
-			];
+			if (!$existByEmail) {
+				$signUp =  UserModel::create([
+					'name'     => $fields['name'],
+					'email'    => $fields['email'],
+					'password' => Hash::make($fields['password']),
+					'type'     => 'client',
+				]);
+
+				$sts = Response::HTTP_CREATED;
+				$rtn = [
+					'user' => new UserResource($signUp),
+				];
+			} else {
+				$sts = Response::HTTP_CREATED;
+				$rtn = ['message' => 'email já cadastrado'];
+			}
 		} catch (\Exception  $e) {
 
 			$sts = Response::HTTP_FAILED_DEPENDENCY;
@@ -64,41 +63,32 @@ class AuthController extends Controller
 
 		$fields = $request->only(['email', 'password']);
 
-		$existByEmail = $this->userService->existByEmail($fields['email']);
-
 		try {
-			if (!$existByEmail) {
-				return response()->json(
-					[
-						'message' => 'Email não localizado!'
-					],
-					Response::HTTP_NOT_FOUND
-				);
-			}
+			$existByEmail = !!UserModel::where(["email" => $fields['email']])->count();
 
 			$attempt = Auth::attempt($fields);
 
-			if ($attempt) {
-				// Artisan::call('migrate');
-				// Artisan::call('migration');
-				// Artisan::call('db:seed');
-
-				$signUp = $this->authService->signIn();
-
-				$sts = Response::HTTP_CREATED;
-				$rtn = new AuthSignInResource($signUp);
-			} else {
-
+			if (!$existByEmail || !$attempt) {
 				$sts = Response::HTTP_MOVED_PERMANENTLY;
 				$rtn = [
 					'message' => 'Email ou senha invalidos!'
 				];
-			}
+			} else {
+				// Artisan::call('migrate');
+				// Artisan::call('migration');
+				// Artisan::call('db:seed');
 
-			return response()->json($rtn, $sts);
+				$authUser   = Auth::user();
+
+				$rtn =  [
+					"token" 	=> $authUser->createToken($authUser->email)->plainTextToken,
+				];
+				$sts = Response::HTTP_CREATED;
+			}
 		} catch (\Exception  $e) {
-			$sts = Response::HTTP_FAILED_DEPENDENCY;
+
 			$rtn = ['message' => $e->getMessage()];
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
 		}
 
 		return response()->json($rtn, $sts);
@@ -110,7 +100,11 @@ class AuthController extends Controller
 			$check = Auth::check();
 
 			if ($check) {
-				$this->authService->signOut();
+				$AuthUser = Auth::user();
+
+				$AuthUser->tokens->each(function ($token) {
+					$token->delete();
+				});
 
 				$rtn = ['message' => 'success'];
 			} else {
@@ -118,9 +112,8 @@ class AuthController extends Controller
 			}
 			$sts = Response::HTTP_NO_CONTENT;
 		} catch (\Exception  $e) {
-
-			$sts = Response::HTTP_FAILED_DEPENDENCY;
 			$rtn = ['message' => $e->getMessage()];
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
 		}
 
 		return response()->json($rtn, $sts);

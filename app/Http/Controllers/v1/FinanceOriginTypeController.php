@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers\v1;
 
-use App\Http\Controllers\v1\Base\CrudController;
-use App\Services\FinanceOriginTypeService;
+use App\Http\Resources\Finance\OriginType\FinanceOriginTypeResource;
+use App\Models\FinanceOriginTypeModel;
+use Symfony\Component\HttpFoundation\Response;
 
-class FinanceOriginTypeController extends CrudController
+class FinanceOriginTypeController
 {
-	protected $nameSingle = 'origin-type';
-	protected $nameMultiple = 'origin-types';
-	protected $service;
-	protected $resource = 'App\Http\Resources\Finance\OriginType\FinanceOriginTypeResource';
-	protected $collection = 'App\Http\Resources\Finance\OriginType\FinanceOriginTypeCollection';
-
-	function __construct(FinanceOriginTypeService $service)
+	public function all()
 	{
-		$this->service = $service;
+		try {
+			$all = FinanceOriginTypeModel::select('id', 'description')->get();
+
+			$rtn = FinanceOriginTypeResource::collection($all);
+			$sts = Response::HTTP_OK;
+		} catch (\Throwable $e) {
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+			$rtn = ['message' => $e->getMessage()];
+		}
+
+		return response()->json($rtn, $sts);
 	}
 }

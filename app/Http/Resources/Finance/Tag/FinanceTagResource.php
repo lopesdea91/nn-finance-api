@@ -15,18 +15,25 @@ class FinanceTagResource extends JsonResource
 	 */
 	public function toArray($request)
 	{
-		$type = $this->type ? ['id' => $this->type->id, 'description' => $this->type->description] : null;
+		$type = !!$this->type
+			? ['id' => $this->type->id, 'description' => $this->type->description]
+			: null;
 
-		$wallet = $this->wallet ? ['id' => $this->wallet->id, 'description' => $this->wallet->description] : null;
+		$wallet = !!$this->wallet
+			? ['id' => $this->wallet->id, 'description' => $this->wallet->description]
+			: null;
 
-		return [
+		$data = [
 			'id' 					=> $this->id,
 			'description' => $this->description,
-			'enable' 			=> $this->enable,
+			'enable' 			=> intval($this->enable),
 			'type' 				=> $type,
 			'wallet' 			=> $wallet,
-			"createdAt"  	=> $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
-			"updatedAt"  	=> $this->updated_at ? $this->updated_at->format('Y-m-d H:i:s') : null
 		];
+
+		!!$this->created_at && ($data['createdAt'] = $this->created_at->format('Y-m-d H:i:s'));
+		!!$this->updated_at && ($data['updatedAt'] = $this->updated_at->format('Y-m-d H:i:s'));
+
+		return $data;
 	}
 }

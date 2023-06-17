@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers\v1;
 
-use App\Http\Controllers\v1\Base\CrudController;
-use App\Services\FinanceTypeService;
+use App\Http\Resources\Finance\Type\FinanceTypeResource;
+use App\Models\FinanceTypeModel;
+use Symfony\Component\HttpFoundation\Response;
 
-class FinanceTypeController extends CrudController
+class FinanceTypeController
 {
-	protected $nameSingle = 'type';
-	protected $nameMultiple = 'types';
-	protected $service;
-	protected $resource = 'App\Http\Resources\Finance\Type\FinanceTypeResource';
-	protected $collection = 'App\Http\Resources\Finance\Type\FinanceTypeCollection';
-
-	function __construct(FinanceTypeService $service)
+	public function all()
 	{
-		$this->service = $service;
+		try {
+			$all = FinanceTypeModel::select('id', 'description')->get();
+
+			$rtn = FinanceTypeResource::collection($all);
+			$sts = Response::HTTP_OK;
+		} catch (\Throwable $e) {
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+			$rtn = ['message' => $e->getMessage()];
+		}
+
+		return response()->json($rtn, $sts);
 	}
 }

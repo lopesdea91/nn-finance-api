@@ -86,7 +86,6 @@ class CrudController extends Controller
 			$fields = $request->only($this->fieldsStore);
 
 			$rtn = new $this->resource($this->service->create($fields));
-
 			$sts = Response::HTTP_CREATED;
 		} catch (\Throwable $e) {
 

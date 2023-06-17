@@ -14,7 +14,7 @@ class CreateFiles extends Command
     public function handle()
     {
         // Artisan::call('make:model FinanceWalletModel');
-        // Artisan::call('make:model FinanceWalletConsolidateMonthModel');
+        // Artisan::call('make:model FinanceWalletConsolidationMonthModel');
         // Artisan::call('make:model FinanceStatusModel');
         // Artisan::call('make:model FinanceTypeModel');
         // Artisan::call('make:model FinanceOriginTypeModel');
