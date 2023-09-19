@@ -17,8 +17,8 @@ return new class extends Migration
 	{
 		Schema::create($this->nameTable, function (Blueprint $table) {
 			$table->bigIncrements('id');
-			$table->foreignId('item_id')->references('id')->on('finance_item');
-			$table->foreignId('tag_id')->references('id')->on('finance_tag');
+			$table->foreignId('item_id')->references('id')->on('finance_item')->onDelete('cascade');
+			$table->foreignId('tag_id')->references('id')->on('finance_tag')->onDelete('cascade');
 		});
 	}
 

@@ -4,15 +4,18 @@ namespace App\Models;
 
 // use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FinanceTagModel extends Model
 {
+	// use HasFactory;
+	use SoftDeletes;
+
 	protected $table = 'finance_tag';
 
 	protected $fillable = [
 		"id",
 		"description",
-		"enable",
 		"type_id",
 		"wallet_id",
 		"created_at",
@@ -20,6 +23,8 @@ class FinanceTagModel extends Model
 	];
 
 	protected $hidden = [];
+
+	public $timestamps = false;
 
 	public function type()
 	{

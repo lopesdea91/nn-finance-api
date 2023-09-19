@@ -27,7 +27,6 @@ class FinanceWalletUpdateRequest extends FormRequest
         return [
             'description'   => 'required|string',
             'json'          => 'nullable|string',
-            'enable'        => 'required|integer',
             'panel'         => 'required|integer',
         ];
     }

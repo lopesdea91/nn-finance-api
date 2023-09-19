@@ -4,23 +4,26 @@ namespace App\Models;
 
 // use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FinanceOriginModel extends Model
 {
     // use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'finance_origin';
 
     protected $fillable = [
         'id',
         'description',
-        'enable',
         'type_id',
         'parent_id',
         'wallet_id',
     ];
 
     protected $hidden = [];
+
+    public $timestamps = false;
 
     public function type()
     {

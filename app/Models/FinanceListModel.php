@@ -15,7 +15,6 @@ class FinanceListModel extends Model
         'id',
         'total',
         'date',
-        'enable',
         'origin_id',
         'status_id',
         'type',
@@ -26,4 +25,6 @@ class FinanceListModel extends Model
     ];
 
     protected $hidden = [];
+
+    public $timestamps = false;
 }

@@ -11,5 +11,4 @@ Route::prefix('origin')->group(function () {
   Route::delete('/{id}', [FinanceOriginControllerV1::class, 'delete']);
 });
 
-Route::get('origin-enabled/{id}', [FinanceOriginControllerV1::class, 'enabled']);
-Route::get('origin-disabled/{id}', [FinanceOriginControllerV1::class, 'disabled']);
+Route::get('origin-restore/{id}', [FinanceOriginControllerV1::class, 'restore']);

@@ -18,7 +18,7 @@ return new class extends Migration
 		Schema::create($this->nameTable, function (Blueprint $table) {
 			$table->id();
 			$table->double('sum', 8, 2)->default(0);
-			$table->foreignId('type_id')->references('id')->on('finance_type');
+			$table->foreignId('type_id')->references('id')->on('finance_type')->onDelete('cascade');
 			$table->foreignId('consolidation_id')->references('id')->on('finance_wallet_consolidation_month');
 		});
 	}

@@ -17,7 +17,6 @@ class FinanceTypeSeeder extends Seeder
 	 */
 	public function run()
 	{
-
 		DB::table($this->nameTable)->insert([
 			['id' => 1, 'description' => 'Receita'],
 			['id' => 2, 'description' => 'Despesa'],

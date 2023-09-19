@@ -15,7 +15,6 @@ class FinanceInvoiceModel extends Model
         'id',
         'total',
         'date',
-        'enable',
         'origin_id',
         'status_id',
         'wallet_id',
@@ -24,4 +23,6 @@ class FinanceInvoiceModel extends Model
     ];
 
     protected $hidden = [];
+
+    public $timestamps = false;
 }

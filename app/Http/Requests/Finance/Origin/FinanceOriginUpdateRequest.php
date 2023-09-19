@@ -26,7 +26,6 @@ class FinanceOriginUpdateRequest extends FormRequest
     {
         return [
             'description'   => 'required|string',
-            'enable'        => 'required|integer',
             'type_id'       => 'nullable|integer',
             'parent_id'     => 'required|integer',
             'wallet_id'     => 'required|integer',

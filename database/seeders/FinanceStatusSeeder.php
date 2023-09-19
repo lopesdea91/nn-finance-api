@@ -18,9 +18,8 @@ class FinanceStatusSeeder extends Seeder
   public function run()
   {
     DB::table($this->nameTable)->insert([
-      ['id' => 1, 'description' => 'Pago'],
+      ['id' => 1, 'description' => 'Ok'],
       ['id' => 2, 'description' => 'Pendente'],
-      ['id' => 3, 'description' => 'Talvez'],
     ]);
   }
 }

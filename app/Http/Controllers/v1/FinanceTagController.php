@@ -12,7 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 class FinanceTagController
 {
 	private $nameSingle = 'tag';
-	private $nameMultiple = 'tags';
 
 	public function all(Request $request)
 	{
@@ -25,9 +24,10 @@ class FinanceTagController
 			];
 			# WHERE 
 			if (key_exists('_q',          $query))  $params['where'][] = ['description', 'like', "%{$query['_q']}%"];
-			if (key_exists('enable',      $query))  $params['where'][] = ['enable',      '=',    $query['enable']];
 			if (key_exists('type_id',     $query))  $params['where'][] = ['type_id',     '=',    $query['type_id']];
 			if (key_exists('wallet_id',   $query))  $params['where'][] = ['wallet_id',   '=',    $query['wallet_id']];
+			if (key_exists('deleted', 		$query))  $params['where']['deleted'] 					= 		 $query['deleted'];
+
 			if (key_exists('_sort',   		$query))  $params['page']['_sort'] 	= $query['_sort'];
 			if (key_exists('_order',   		$query))  $params['page']['_order'] = $query['_order'];
 			if (key_exists('_limit',   		$query))  $params['page']['_limit'] = $query['_limit'];
@@ -54,8 +54,12 @@ class FinanceTagController
 	}
 	public function page($params)
 	{
-		$where = $params['where'];
-		$page  = $params['page'];
+		$where 			 = $params['where'];
+		$page  			 = $params['page'];
+		$onlyTrashed = key_exists('deleted', $params['where']);
+
+		unset($where['deleted']);
+		unset($params['where']['deleted']);
 
 		$order  = 'id';
 		$sort   = 'desc';
@@ -64,9 +68,6 @@ class FinanceTagController
 		# ORDER 
 		if (key_exists('_order', $page)) {
 			$order = $page['_order'];
-
-			if ($order === 'updated') $order = 'updated_at';
-			if ($order === 'created') $order = 'created_at';
 		}
 		# SORT
 		if (key_exists('_sort', $page)) {
@@ -81,13 +82,19 @@ class FinanceTagController
 			$limit = $page['_limit'];
 		}
 
-		$result = FinanceTagModel::select(
+		$columns = [
 			"id",
 			"description",
-			"enable",
 			"type_id",
-			"wallet_id"
-		)
+			"wallet_id",
+			'deleted_at',
+		];
+
+		$model = $onlyTrashed
+			? FinanceTagModel::onlyTrashed()->select($columns)
+			: FinanceTagModel::withTrashed(false)->select($columns);
+
+		$result = $model
 			->with([
 				'type',
 				'wallet' => function ($q) {
@@ -99,7 +106,7 @@ class FinanceTagController
 			->paginate($limit);
 
 		return [
-			'count' => $result->count(),
+			'count' => count($result->items()),
 			'data' => [
 				"items"     => FinanceTagResource::collection($result->items()),
 				"page"      => $result->currentPage(),
@@ -111,15 +118,25 @@ class FinanceTagController
 	}
 	public function get($params)
 	{
-		$where = $params['where'];
+		$where 		   = $params['where'];
+		$onlyTrashed = key_exists('deleted', $params['where']);
 
-		$result = FinanceTagModel::select(
+		unset($where['deleted']);
+		unset($params['where']['deleted']);
+
+		$columns = [
 			"id",
 			"description",
-			"enable",
 			"type_id",
-			"wallet_id"
-		)
+			"wallet_id",
+			'deleted_at',
+		];
+
+		$model = $onlyTrashed
+			? FinanceTagModel::onlyTrashed()->select($columns)
+			: FinanceTagModel::withTrashed(false)->select($columns);
+
+		$result = $model
 			->with([
 				'type',
 				'wallet' => function ($q) {
@@ -136,14 +153,12 @@ class FinanceTagController
 	public function id($id)
 	{
 		try {
-			$result = FinanceTagModel::select(
+			$result = FinanceTagModel::withTrashed()->select(
 				"id",
 				"description",
-				"enable",
 				"type_id",
 				"wallet_id",
-				"created_at",
-				"updated_at"
+				"deleted_at",
 			)
 				->with(
 					'type',
@@ -180,7 +195,6 @@ class FinanceTagController
 
 			FinanceTagModel::create([
 				'description' => $fields['description'],
-				'enable' 			=> 1,
 				'type_id' 		=> $fields['type_id'],
 				'wallet_id' 	=> $fields['wallet_id'],
 			]);
@@ -204,21 +218,18 @@ class FinanceTagController
 
 			$request->validate([
 				'description'   => 'required|string',
-				'enable'       	=> 'nullable|integer',
 				'type_id'       => 'nullable|integer',
 				'wallet_id'     => 'required|integer',
 			]);
 
 			$fields = $request->only([
 				'description',
-				'enable',
 				'type_id',
 				'wallet_id',
 			]);
 
 			$result->update([
 				'description' => $fields['description'],
-				'enable' 			=> $fields['enable'],
 				'type_id' 		=> $fields['type_id'],
 				'wallet_id' 	=> $fields['wallet_id'],
 			]);
@@ -234,13 +245,17 @@ class FinanceTagController
 	}
 	public function delete($id)
 	{
-		$result = FinanceTagModel::find($id);
+		$result = FinanceTagModel::withTrashed()->find($id);
 
 		if (!$result)
 			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
 
 		try {
-			$result->delete();
+			if (!!$result->deleted_at) {
+				$result->forceDelete();
+			} else {
+				$result->delete();
+			}
 
 			$rtn = ['message' => "{$this->nameSingle} deletado"];
 			$sts = Response::HTTP_NO_CONTENT;
@@ -251,37 +266,18 @@ class FinanceTagController
 
 		return response()->json($rtn, $sts);
 	}
-	public function enabled($id)
+	public function restore($id)
 	{
-		$result = FinanceTagModel::find($id);
+		$result = FinanceTagModel::onlyTrashed()->find($id);
 
 		if (!$result)
-			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
+			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não esta deletado para restaurar!");
 
 		try {
-			$result->update(['enable' => '1']);
+			$result->restore();
 
-			$rtn = ['message' => "{$this->nameSingle} ativa"];
-			$sts = Response::HTTP_NO_CONTENT;
-		} catch (\Throwable $e) {
-			$rtn = ['message' => $e->getMessage()];
-			$sts = Response::HTTP_FAILED_DEPENDENCY;
-		}
-
-		return response()->json([], $sts);
-	}
-	public function disabled($id)
-	{
-		$result = FinanceTagModel::find($id);
-
-		if (!$result)
-			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
-
-		try {
-			$result->update(['enable' => '0']);
-
-			$rtn = ['message' => "{$this->nameSingle} inativa"];
-			$sts = Response::HTTP_NO_CONTENT;
+			$rtn = ['message' => "{$this->nameSingle} restaurada!"];
+			$sts = Response::HTTP_OK;
 		} catch (\Throwable $e) {
 			$rtn = ['message' => $e->getMessage()];
 			$sts = Response::HTTP_FAILED_DEPENDENCY;

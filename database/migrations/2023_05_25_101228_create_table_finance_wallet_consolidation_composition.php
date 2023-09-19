@@ -21,7 +21,7 @@ return new class extends Migration
 			$table->double('value_limit', 8, 2)->default(0);
 			$table->double('percentage_limit', 8, 2)->default(0);
 			$table->double('percentage_current', 8, 2)->default(0);
-			$table->foreignId('tag_id')->references('id')->on('finance_tag');
+			$table->foreignId('tag_id')->references('id')->on('finance_tag')->onDelete('cascade');
 			$table->integer('consolidation_id')->nullable();
 		});
 	}

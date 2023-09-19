@@ -18,7 +18,7 @@ return new class extends Migration
 		Schema::create($this->nameTable, function (Blueprint $table) {
 			$table->id();
 			$table->string('obs', 300)->default('');
-			$table->foreignId('item_id')->references('id')->on('finance_item');
+			$table->foreignId('item_id')->references('id')->on('finance_item')->onDelete('cascade');
 		});
 	}
 

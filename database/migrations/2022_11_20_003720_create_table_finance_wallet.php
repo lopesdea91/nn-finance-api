@@ -19,10 +19,11 @@ return new class extends Migration
 			$table->id('id');
 			$table->string('description');
 			// $table->json('json');
-			$table->enum('enable', [1, 0])->default(1);
+			// $table->enum('enable', [1, 0])->default(1);
 			$table->enum('panel', [1, 0])->default(0);
 			$table->foreignId('user_id')->references('id')->on('users');
-			$table->timestamps();
+			$table->softDeletes();
+			// $table->timestamps();
 		});
 	}
 

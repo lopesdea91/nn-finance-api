@@ -22,4 +22,9 @@ class FinanceWalletCompositionModel extends Model
 	{
 		return $this->hasOne("App\Models\FinanceTagModel", 'id', 'tag_id');
 	}
+
+	public function wallet()
+	{
+		return $this->hasOne("App\Models\FinanceWalletModel", 'id', 'wallet_id');
+	}
 }

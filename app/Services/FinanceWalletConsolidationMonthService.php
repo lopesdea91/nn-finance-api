@@ -113,16 +113,13 @@ class FinanceWalletConsolidationMonthService
 
   private function getFinanceItems()
   {
-    $this->items = FinanceItemModel::select('id', 'value', 'date', 'origin_id', 'status_id', 'type_id', 'wallet_id')
+    $this->items = FinanceItemModel::withTrashed(false)
+      ->select('id', 'value', 'date', 'origin_id', 'status_id', 'type_id', 'wallet_id', 'deleted_at')
       ->whereYear('date', $this->periodCurrent)
       ->whereMonth('date', $this->periodCurrent)
-      ->where([
-        'enable' => 1,
-      ])
       ->whereHas('wallet', function ($q) {
-        $q->where([
-          'id' => $this->wallet_id,
-        ]);
+        $q->select('id', 'description');
+        $q->where(['id' => $this->wallet_id]);
       })
       ->orderByRaw('date desc, sort desc, id asc')
       ->with('tags')
@@ -139,11 +136,10 @@ class FinanceWalletConsolidationMonthService
     $expenseOk    = 0;
     $expenseNotOk = 0;
 
-
     ## agrupa tags em data_consolidate_base
     foreach ($this->items as $key => $item) {
-      $isOk       = $item['status_id'] === 1;
-      $isReceita  = $item['type_id'] === 1;
+      $isOk       = $item['status_id']  === 1;
+      $isReceita  = $item['type_id']    === 1;
       $value      = $item['value'];
 
       ## apply value

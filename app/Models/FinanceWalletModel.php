@@ -4,16 +4,16 @@ namespace App\Models;
 
 // use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FinanceWalletModel extends Model
 {
-    // use HasFactory;
+    use SoftDeletes;
 
     protected $table = 'finance_wallet';
 
     protected $fillable = [
         'description',
-        'enable',
         'panel',
         'user_id',
     ];
@@ -21,6 +21,8 @@ class FinanceWalletModel extends Model
     protected $hidden = [
         'user_id'
     ];
+
+    public $timestamps = false;
 
     public function user()
     {

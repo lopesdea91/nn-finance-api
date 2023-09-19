@@ -14,7 +14,6 @@ class FinanceGroupModel extends Model
     protected $fillable = [
         'id',
         'description',
-        'enable',
         'type_id',
         'wallet_id',
         'user_id'

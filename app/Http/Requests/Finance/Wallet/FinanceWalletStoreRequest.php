@@ -27,7 +27,6 @@ class FinanceWalletStoreRequest extends FormRequest
         return [
             'description'   => 'required|unique:finance_wallet,description',
             // 'json',
-            // 'enable',
             // 'panel',
             // 'user_id',
         ];

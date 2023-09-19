@@ -25,7 +25,6 @@ class FinanceCategoryResource extends JsonResource
         return [
             "id"            => $this->id,
             "description"   => $this->description,
-            "enable"        => $this->enable,
             "obs"           => $this->obs,
             "group_id"      => $this->group_id,
             "group"         => $group,

@@ -18,7 +18,7 @@ return new class extends Migration
 		Schema::create($this->nameTable, function (Blueprint $table) {
 			$table->id();
 			$table->foreignId('consolidation_tag_id')->references('id')->on('finance_wallet_consolidation_tag');
-			$table->foreignId('tag_id')->references('id')->on('finance_tag');
+			$table->foreignId('tag_id')->references('id')->on('finance_tag')->onDelete('cascade');
 		});
 	}
 

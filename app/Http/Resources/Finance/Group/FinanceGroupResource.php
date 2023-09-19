@@ -21,7 +21,6 @@ class FinanceGroupResource extends JsonResource
         return [
             'id'            => $this->id,
             'description'   => $this->description,
-            'enable'        => $this->enable,
             'type_id'       => $this->type_id,
             'type'          => $type,
             'wallet_id'     => $this->wallet_id,

@@ -6,10 +6,12 @@ namespace App\Models;
 
 // use App\Casts\FinanceItemTagsCast;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FinanceItemModel extends Model
 {
 	// use HasFactory;
+	use SoftDeletes;
 
 	protected $table = 'finance_item';
 
@@ -18,11 +20,12 @@ class FinanceItemModel extends Model
 		'value',
 		'date',
 		'sort',
-		'enable',
+		'balance',
 		'origin_id',
 		'status_id',
 		'type_id',
 		'wallet_id',
+		'deleted_at',
 	];
 
 	protected $hidden = [];

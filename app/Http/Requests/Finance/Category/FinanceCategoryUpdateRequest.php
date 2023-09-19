@@ -26,7 +26,6 @@ class FinanceCategoryUpdateRequest extends FormRequest
     {
         return [
             'description'   => 'required|string',
-            'enable'        => 'required|integer',
             'obs'           => 'required|string',
             'wallet_id'     => 'required|integer',
             // 'type_id'       => 'nullable|integer',

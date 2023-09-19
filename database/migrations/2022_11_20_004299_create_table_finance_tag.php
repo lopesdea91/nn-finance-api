@@ -18,11 +18,12 @@ return new class extends Migration
 		Schema::create($this->nameTable, function (Blueprint $table) {
 			$table->id('id');
 			$table->string('description');
-			$table->enum('enable', [1, 0])->default(1);
+			// $table->enum('enable', [1, 0])->default(1);
 			$table->foreignId('type_id')->references('id')->on('finance_type');
 			$table->foreignId('wallet_id')->references('id')->on('finance_wallet');
 			// $table->foreignId('user_id')->references('id')->on('users');
-			$table->timestamps();
+			$table->softDeletes();
+			// $table->timestamps();
 		});
 	}
 

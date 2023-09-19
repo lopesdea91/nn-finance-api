@@ -15,10 +15,14 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            // FinanceStatusSeeder::class,
-            // FinanceTypeSeeder::class,
-            // FinanceOriginTypeSeeder::class,
-            // TestesSeeder::class
+            // DropTableSeeder::class,
+
+            FinanceStatusSeeder::class,
+            FinanceTypeSeeder::class,
+            FinanceOriginTypeSeeder::class,
+            UserTestSeeder::class,
+
+            // TestesSeeder::class,
         ]);
     }
 }

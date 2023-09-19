@@ -29,17 +29,14 @@ class FinanceOriginResource extends JsonResource
 		$data = [
 			'id'          => $this->id,
 			'description' => $this->description,
-			'enable'      => $this->enable,
 			// 'type_id'     => $this->type_id,
 			'type'        => $type,
 			// 'parent_id'   => $this->parent_id,
 			'parent'      => $parent,
 			// 'wallet_id'   => $this->wallet_id,
 			'wallet'      => $wallet,
+			"trashed"			=> !!$this->deleted_at
 		];
-
-		!!$this->created_at && ($data['createdAt'] = $this->created_at->format('Y-m-d H:i:s'));
-		!!$this->updated_at && ($data['updatedAt'] = $this->updated_at->format('Y-m-d H:i:s'));
 
 		return $data;
 	}

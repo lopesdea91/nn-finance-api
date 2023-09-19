@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 class FinanceWalletController
 {
 	private $nameSingle = 'wallet';
-	private $nameMultiple = 'wallets';
 
 	public function all(Request $request)
 	{
@@ -30,11 +29,12 @@ class FinanceWalletController
 			];
 			# WHERE 
 			if (key_exists('_q',          $query))  $params['where'][] = ['description', 'like', "%{$query['_q']}%"];
-			if (key_exists('enable',      $query))  $params['where'][] = ['enable',      '=',    $query['enable']];
 			if (key_exists('panel',      	$query))  $params['where'][] = ['panel',       '=',    $query['panel']];
-			if (key_exists('_sort',   		$query))  $params['page']['_sort'] 	= $query['_sort'];
-			if (key_exists('_order',   		$query))  $params['page']['_order'] = $query['_order'];
-			if (key_exists('_limit',   		$query))  $params['page']['_limit'] = $query['_limit'];
+			if (key_exists('deleted',			$query))  $params['where']['deleted']	= $query['deleted'];
+
+			if (key_exists('_sort',   		$query))  $params['page']['_sort'] 		= $query['_sort'];
+			if (key_exists('_order',   		$query))  $params['page']['_order'] 	= $query['_order'];
+			if (key_exists('_limit',   		$query))  $params['page']['_limit'] 	= $query['_limit'];
 
 			$hasPaginate = key_exists('_paginate', $query);
 
@@ -58,8 +58,12 @@ class FinanceWalletController
 	}
 	public function page($params)
 	{
-		$where = $params['where'];
-		$page  = $params['page'];
+		$page  			= $params['page'];
+		$where 			= $params['where'];
+		$onlyTrashed = key_exists('deleted', $params['where']);
+
+		unset($where['deleted']);
+		unset($params['where']['deleted']);
 
 		$order  = 'id';
 		$sort   = 'desc';
@@ -68,9 +72,6 @@ class FinanceWalletController
 		# ORDER 
 		if (key_exists('_order', $page)) {
 			$order = $page['_order'];
-
-			if ($order === 'updated') $order = 'updated_at';
-			if ($order === 'created') $order = 'created_at';
 		}
 		# SORT
 		if (key_exists('_sort', $page)) {
@@ -85,19 +86,22 @@ class FinanceWalletController
 			$limit = $page['_limit'];
 		}
 
-		$result = FinanceWalletModel::select(
+		$columns = [
 			'id',
 			'description',
-			'enable',
 			'panel',
 			'user_id',
-		)
-			->where($where)
-			->orderByRaw($order)
-			->paginate($limit);
+			'deleted_at',
+		];
+
+		$model = $onlyTrashed
+			? FinanceWalletModel::onlyTrashed()->select($columns)
+			: FinanceWalletModel::withTrashed(false)->select($columns);
+
+		$result = $model->where($where)->orderByRaw($order)->paginate($limit);
 
 		return [
-			'count' => $result->count(),
+			'count' => count($result->items()),
 			'data' => [
 				"items"     => FinanceWalletResource::collection($result->items()),
 				"page"      => $result->currentPage(),
@@ -110,36 +114,39 @@ class FinanceWalletController
 	public function get($params)
 	{
 		$where = $params['where'];
+		$onlyTrashed = key_exists('deleted', $params['where']);
 
-		$result = FinanceWalletModel::select(
+		unset($where['deleted']);
+		unset($params['where']['deleted']);
+
+		$columns = [
 			'id',
 			'description',
-			'enable',
 			'panel',
 			'user_id',
-		)
-			->where($where);
+			'deleted_at',
+		];
+
+		$model = $onlyTrashed
+			? FinanceWalletModel::onlyTrashed()->select($columns)
+			: FinanceWalletModel::withTrashed(false)->select($columns);
+
+		$model->where($where);
 
 		return [
-			'count' => $result->count(),
-			'data' => FinanceWalletResource::collection($result->get()),
+			'count' => $model->count(),
+			'data' => FinanceWalletResource::collection($model->get()),
 		];
 	}
 	public function id($id)
 	{
 		try {
-			$result = FinanceWalletModel::select(
+			$result = FinanceWalletModel::withTrashed()->select(
+				'id',
 				'description',
-				'enable',
 				'panel',
-				"created_at",
-				"updated_at"
-			)
-				// ->with(
-				// 	'type',
-				// 	'wallet'
-				// )
-				->find($id);
+				"deleted_at"
+			)->find($id);
 
 			if (!$result)
 				throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
@@ -166,7 +173,6 @@ class FinanceWalletController
 
 			FinanceWalletModel::create([
 				'description' => $fields['description'],
-				'enable' 			=> 1,
 				'panel' 			=> 1,
 				'user_id' 		=> Auth::user()->id,
 			]);
@@ -190,19 +196,16 @@ class FinanceWalletController
 
 			$request->validate([
 				'description'   => 'required|string',
-				'enable'       	=> 'nullable|integer',
 				'panel'       	=> 'nullable|integer',
 			]);
 
 			$fields = $request->only([
 				'description',
-				'enable',
 				'panel'
 			]);
 
 			$result->update([
 				'description' => $fields['description'],
-				'enable' 			=> $fields['enable'],
 				'panel' 			=> $fields['panel'],
 			]);
 
@@ -217,12 +220,36 @@ class FinanceWalletController
 	}
 	public function delete($id)
 	{
-		$result = FinanceWalletModel::find($id);
+		$result = FinanceWalletModel::withTrashed()->find($id);
 
 		if (!$result)
 			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
 
 		try {
+			if (!!$result->deleted_at) {
+				/** DELETE TAG */
+				/** DELETE finance_wallet_consolidation_tags */
+				/** DELETE finance_wallet_consolidation_tag */
+				/** DELETE finance_wallet_consolidation_origin */
+				/** DELETE finance_wallet_consolidation_month */
+				/** DELETE finance_wallet_consolidation_composition */
+				/** DELETE finance_wallet_consolidation_balance */
+				/** DELETE finance_wallet_composition */
+				/** DELETE finance_wallet */
+				/** DELETE finance_item_repat */
+				/** DELETE finance_item_obs */
+				/** DELETE finance_item_tag */
+				/** DELETE finance_item */
+				/** DELETE finance_list_item */
+				/** DELETE finance_list */
+				/** DELETE finance_invoice_item */
+				/** DELETE finance_invoice */
+
+				$result->forceDelete();
+			} else {
+				$result->delete();
+			}
+
 			$rtn = $result->delete();
 			$sts = Response::HTTP_NO_CONTENT;
 		} catch (\Throwable $e) {
@@ -232,37 +259,18 @@ class FinanceWalletController
 
 		return response()->json($rtn, $sts);
 	}
-	public function enabled($id)
+	public function restore($id)
 	{
-		$result = FinanceWalletModel::find($id);
+		$result = FinanceWalletModel::onlyTrashed()->find($id);
 
 		if (!$result)
-			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
+			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não esta deletado para restaurar!");
 
 		try {
-			$result->update(['enable' => '1']);
+			$result->restore();
 
-			$rtn = ['message' => "{$this->nameSingle} ativa"];
-			$sts = Response::HTTP_NO_CONTENT;
-		} catch (\Throwable $e) {
-			$rtn = ['message' => $e->getMessage()];
-			$sts = Response::HTTP_FAILED_DEPENDENCY;
-		}
-
-		return response()->json([], $sts);
-	}
-	public function disabled($id)
-	{
-		$result = FinanceWalletModel::find($id);
-
-		if (!$result)
-			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
-
-		try {
-			$result->update(['enable' => '0']);
-
-			$rtn = ['message' => "{$this->nameSingle} inativa"];
-			$sts = Response::HTTP_NO_CONTENT;
+			$rtn = ['message' => "{$this->nameSingle} restaurada!"];
+			$sts = Response::HTTP_OK;
 		} catch (\Throwable $e) {
 			$rtn = ['message' => $e->getMessage()];
 			$sts = Response::HTTP_FAILED_DEPENDENCY;
@@ -270,6 +278,7 @@ class FinanceWalletController
 
 		return response()->json($rtn, $sts);
 	}
+
 	public function dataPeriods(Request $request)
 	{
 		try {
@@ -282,7 +291,6 @@ class FinanceWalletController
 
 			$items = FinanceItemModel::where([
 				'wallet_id' => $fields['wallet_id'],
-				'enable'    => 1,
 			])
 				->selectRaw(DB::raw("DATE_FORMAT(date, '%Y-%m') as period"))
 				->groupBy(DB::raw('period'))
@@ -308,35 +316,110 @@ class FinanceWalletController
 
 		return response()->json($rtn, $sts);
 	}
-	public function composition($id, Request $request)
+
+	public function getComposition(Request $request)
 	{
+		$user_id	= Auth::user()->id;
+
 		$request->validate([
+			'wallet_id' => 'required',
+		]);
+
+		try {
+			$fields = $request->only(['wallet_id']);
+
+			$wallet_id = $fields['wallet_id'];
+
+			$result = FinanceWalletCompositionModel::where([
+				'wallet_id' => $wallet_id,
+			])
+				->whereHas('wallet', function ($q) use ($user_id) {
+					$q->where('user_id', '=', $user_id);
+				})
+				->get();
+
+			$rtn = $result;
+			$sts = Response::HTTP_OK;
+		} catch (\Throwable $e) {
+			$rtn = ['message' => $e->getMessage()];
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+		}
+
+		return response()->json($rtn, $sts);
+	}
+	public function createComposition(Request $request)
+	{
+		$user_id	= Auth::user()->id;
+
+		$request->validate([
+			'wallet_id' => 'required',
 			'composition' => 'required',
 		]);
 
-		$fields = $request->only(['composition']);
-
 		try {
-			$fields = $request->only(['composition']);
+			$fields = $request->only(['wallet_id', 'composition']);
 
 			$composition = $fields['composition'];
+			$wallet_id = $fields['wallet_id'];
+
 
 			// delete old 
 			FinanceWalletCompositionModel::where([
-				'wallet_id' => $id,
-			])->delete();
+				'wallet_id' => $wallet_id,
+			])
+				->whereHas('wallet', function ($q) use ($user_id) {
+					$q->where('user_id', '=', $user_id);
+				})
+				->delete();
 
 			// create new
 			foreach ($composition as $value) {
 				FinanceWalletCompositionModel::create([
 					'percentage_limit' => $value['percentage_limit'],
 					'tag_id' => $value['tag_id'],
-					'wallet_id' => $id,
+					'wallet_id' => $wallet_id,
 				]);
 			}
 
 			$rtn = ['message' => "Composição atualizada!"];
 			$sts = Response::HTTP_OK;
+		} catch (\Throwable $e) {
+			$rtn = ['message' => $e->getMessage()];
+			$sts = Response::HTTP_FAILED_DEPENDENCY;
+		}
+
+		return response()->json($rtn, $sts);
+	}
+	public function deleteComposition($id, Request $request)
+	{
+		$user_id	= Auth::user()->id;
+
+		$request->validate([
+			'wallet_id' => 'required|exists:finance_wallet,id',
+		]);
+
+		$fields = $request->only([
+			'wallet_id',
+		]);
+
+		$fields = $request->only(['wallet_id']);
+
+		$wallet_id = $fields['wallet_id'];
+
+		$result = FinanceWalletCompositionModel::where([
+			'wallet_id' => $wallet_id,
+		])
+			->whereHas('wallet', function ($q) use ($user_id) {
+				$q->where('user_id', '=', $user_id);
+			})
+			->find($id);
+
+		if (!$result)
+			throw new ApiExceptionResponse("consolidation: id ($id) não existe!");
+
+		try {
+			$rtn = $result->delete();
+			$sts = Response::HTTP_NO_CONTENT;
 		} catch (\Throwable $e) {
 			$rtn = ['message' => $e->getMessage()];
 			$sts = Response::HTTP_FAILED_DEPENDENCY;

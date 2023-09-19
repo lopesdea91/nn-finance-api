@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreignId('type_id')->nullable()->default(null)->references('id')->on('finance_type');
             // $table->foreignId('group_id')->nullable()->default(null)->references('id')->on('finance_group');
             // $table->foreignId('category_id')->nullable()->default(null)->references('id')->on('finance_category');
-            $table->foreignId('invoice_id')->references('id')->on('finance_invoice');
+            $table->foreignId('invoice_id')->references('id')->on('finance_invoice')->onDelete('cascade');
         });
     }
 

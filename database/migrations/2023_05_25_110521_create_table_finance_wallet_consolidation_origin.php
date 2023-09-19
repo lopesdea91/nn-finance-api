@@ -21,7 +21,7 @@ return new class extends Migration
 			$table->double('revenue', 8, 2)->nullable();
 			$table->double('expense', 8, 2)->nullable();
 			$table->double('average', 8, 2)->nullable();
-			$table->foreignId('origin_id')->references('id')->on('finance_origin');
+			$table->foreignId('origin_id')->references('id')->on('finance_origin')->onDelete('cascade');
 			$table->integer('consolidation_id')->references('id')->on('finance_wallet_consolidation_month');
 		});
 	}

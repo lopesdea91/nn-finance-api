@@ -19,14 +19,15 @@ return new class extends Migration
             $table->id('id');
             $table->double('total', 8, 2);
             $table->date('date');
-            $table->enum('enable', [1, 0])->default(1);
-            $table->foreignId('origin_id')->nullable()->default(null)->references('id')->on('finance_origin');
-            $table->foreignId('status_id')->nullable()->default(null)->references('id')->on('finance_status');
+            // $table->enum('enable', [1, 0])->default(1);
+            $table->foreignId('origin_id')->nullable()->references('id')->on('finance_origin');
+            $table->foreignId('status_id')->nullable()->references('id')->on('finance_status');
             $table->enum('type', ['finance_item', 'finance_invoice'])->default('finance_item');
-            $table->integer('type_id')->nullable()->default(null);
-            $table->foreignId('invoice_id')->nullable()->default(null)->references('id')->on('finance_invoice');
-            $table->foreignId('wallet_id')->nullable()->default(null)->references('id')->on('finance_wallet');
-            $table->foreignId('user_id')->nullable()->default(null)->references('id')->on('users');
+            $table->integer('type_id')->nullable();
+            $table->foreignId('invoice_id')->nullable()->references('id')->on('finance_invoice');
+            $table->foreignId('wallet_id')->nullable()->references('id')->on('finance_wallet')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->references('id')->on('users');
+            $table->softDeletes();
         });
     }
 

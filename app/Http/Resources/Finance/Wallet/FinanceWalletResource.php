@@ -17,8 +17,8 @@ class FinanceWalletResource extends JsonResource
 		return [
 			'id'            => $this->id,
 			'description'   => $this->description,
-			'enable'        => intval($this->enable),
-			'panel'         => intval($this->panel)
+			'panel'         => intval($this->panel),
+			"trashed"				=> !!$this->deleted_at
 		];
 	}
 }

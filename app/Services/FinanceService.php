@@ -34,7 +34,6 @@ class FinanceService
 
 		$walletPanel = FinanceWalletModel::select(
 			'description',
-			'enable',
 			'panel',
 			'user_id',
 		)->where([
@@ -46,7 +45,6 @@ class FinanceService
 		$wallet = FinanceWalletModel::select(
 			'id',
 			'description',
-			'enable',
 			'panel',
 			'user_id',
 		)->where([
@@ -58,13 +56,13 @@ class FinanceService
 		$origin = FinanceOriginModel::select(
 			'id',
 			'description',
-			'enable',
 			'type_id',
 			'parent_id',
 			'wallet_id',
+			"wallet_id",
 		)
 			->whereHas('wallet', function ($q) use ($user_id) {
-				$q->where('type_id', '=', 2);
+				$q->where('user_id', '=', $user_id);
 			})
 			->orderBy('description')
 			->get();
@@ -72,9 +70,9 @@ class FinanceService
 		$tag = FinanceTagModel::select(
 			"id",
 			"description",
-			"enable",
 			"type_id",
 			"wallet_id",
+			'deleted_at'
 		)
 			->whereHas('wallet', function ($q) use ($user_id) {
 				$q->where('user_id', $user_id);

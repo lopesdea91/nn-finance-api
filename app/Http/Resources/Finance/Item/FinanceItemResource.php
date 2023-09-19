@@ -47,17 +47,14 @@ class FinanceItemResource extends JsonResource
 			"value"   => $this->value,
 			"date"    => $this->date,
 			"sort"    => intval($this->sort),
-			"enable"  => intval($this->enable),
 			"obs"     => $obs,
 			"origin"  => $origin,
 			"status"  => $status,
 			"type"    => $type,
 			"tag_ids" => $tag_ids,
 			"wallet"  => $wallet,
+			"trashed"	=> !!$this->deleted_at
 		];
-
-		!!$this->created_at && ($data['createdAt'] = $this->created_at->format('Y-m-d H:i:s'));
-		!!$this->updated_at && ($data['updatedAt'] = $this->updated_at->format('Y-m-d H:i:s'));
 
 		return $data;
 	}

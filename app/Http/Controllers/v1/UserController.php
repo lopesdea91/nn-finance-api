@@ -19,6 +19,7 @@ class UserController
 			$user = UserModel::find($authUser->id);
 
 			$rtn =  [
+				'period' 	=> '2023-04', // now()->format('Y-m'),
 				'user'    => new UserResource($user),
 			];
 			$sts = Response::HTTP_OK;

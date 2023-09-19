@@ -26,7 +26,6 @@ class FinanceGroupStoreRequest extends FormRequest
     {
         return [
             'description'   => 'required|string',
-            'enable'        => 'required|integer',
             'type_id'       => 'nullable|integer',
             'wallet_id'     => 'required|integer',
         ];

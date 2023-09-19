@@ -11,5 +11,4 @@ Route::prefix('tag')->group(function () {
   Route::delete('/{id}', [FinanceTagControllerV1::class, 'delete']);
 });
 
-Route::get('tag-enabled/{id}', [FinanceTagControllerV1::class, 'enabled']);
-Route::get('tag-disabled/{id}', [FinanceTagControllerV1::class, 'disabled']);
+Route::get('tag-restore/{id}', [FinanceTagControllerV1::class, 'restore']);

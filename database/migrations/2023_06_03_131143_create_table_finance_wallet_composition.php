@@ -18,8 +18,8 @@ return new class extends Migration
 		Schema::create($this->nameTable, function (Blueprint $table) {
 			$table->id();
 			$table->double('percentage_limit', 8, 2)->default(0);
-			$table->foreignId('tag_id')->references('id')->on('finance_tag');
-			$table->foreignId('wallet_id')->references('id')->on('finance_wallet');
+			$table->foreignId('tag_id')->references('id')->on('finance_tag')->onDelete('cascade');
+			$table->foreignId('wallet_id')->references('id')->on('finance_wallet')->onDelete('cascade');
 		});
 	}
 

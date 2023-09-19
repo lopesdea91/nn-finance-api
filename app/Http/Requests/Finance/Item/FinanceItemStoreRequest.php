@@ -30,8 +30,6 @@ class FinanceItemStoreRequest extends FormRequest
             "date"        => 'required|string',
             // "obs"         => 'required|string',
             "sort"        => 'required|integer',
-            "enable"      => 'required|integer',
-            "enable"      => 'required|integer',
             "repeat"      => ['required', Rule::in('UNIQUE', 'REPEAT')],
             "origin_id"   => 'required|exists:finance_origin,id',
             "status_id"   => 'required|exists:finance_status,id',

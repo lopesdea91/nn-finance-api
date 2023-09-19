@@ -21,10 +21,10 @@ return new class extends Migration
             $table->double('value', 8, 2);
             $table->string('obs', 300)->default('');
             $table->integer('sort');
-            $table->foreignId('type_id')->references('id')->on('finance_type');
+            $table->foreignId('type_id')->references('id')->on('finance_type')->onDelete('cascade');
             // $table->foreignId('category_id')->references('id')->on('finance_category');
             // $table->foreignId('group_id')->references('id')->on('finance_group');
-            $table->foreignId('list_id')->references('id')->on('finance_list');
+            $table->foreignId('list_id')->references('id')->on('finance_list')->onDelete('cascade');
         });
     }
 

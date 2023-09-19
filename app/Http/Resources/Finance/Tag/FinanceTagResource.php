@@ -26,13 +26,10 @@ class FinanceTagResource extends JsonResource
 		$data = [
 			'id' 					=> $this->id,
 			'description' => $this->description,
-			'enable' 			=> intval($this->enable),
 			'type' 				=> $type,
 			'wallet' 			=> $wallet,
+			"trashed"			=> !!$this->deleted_at
 		];
-
-		!!$this->created_at && ($data['createdAt'] = $this->created_at->format('Y-m-d H:i:s'));
-		!!$this->updated_at && ($data['updatedAt'] = $this->updated_at->format('Y-m-d H:i:s'));
 
 		return $data;
 	}

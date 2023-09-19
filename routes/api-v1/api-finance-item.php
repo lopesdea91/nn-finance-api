@@ -11,6 +11,5 @@ Route::prefix('item')->group(function () {
   Route::delete('/{id}', [FinanceItemControllerV1::class, 'delete']);
 });
 
+Route::get('item-restore/{id}', [FinanceItemControllerV1::class, 'restore']);
 Route::post('item-status', [FinanceItemControllerV1::class, 'status']);
-Route::get('item-enabled/{id}', [FinanceItemControllerV1::class, 'enabled']);
-Route::get('item-disabled/{id}', [FinanceItemControllerV1::class, 'disabled']);

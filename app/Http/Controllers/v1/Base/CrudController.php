@@ -134,42 +134,4 @@ class CrudController extends Controller
 
 		return response()->json($rtn, $sts);
 	}
-
-	public function enabled($id)
-	{
-		if (!$this->service->exist($id))
-			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
-
-		try {
-			$this->service->enabled($id);
-
-			$rtn = ['message' => "{$this->nameSingle} ativado(a)"];
-			$sts = Response::HTTP_OK;
-		} catch (\Throwable $e) {
-
-			$sts = Response::HTTP_FAILED_DEPENDENCY;
-			$rtn = ['message' => $e->getMessage()];
-		}
-
-		return response()->json($rtn, $sts);
-	}
-
-	public function disabled($id)
-	{
-		if (!$this->service->exist($id))
-			throw new ApiExceptionResponse("{$this->nameSingle}: id ($id) não existe!");
-
-		try {
-			$this->service->disabled($id);
-
-			$rtn = ['message' => "{$this->nameSingle} desativado(a)"];
-			$sts = Response::HTTP_OK;
-		} catch (\Throwable $e) {
-
-			$sts = Response::HTTP_FAILED_DEPENDENCY;
-			$rtn = ['message' => $e->getMessage()];
-		}
-
-		return response()->json($rtn, $sts);
-	}
 }
