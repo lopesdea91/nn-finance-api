@@ -32,7 +32,7 @@ class UserTestSeeder extends Seeder
 			'type'     => 'client',
 		]);
 		$financeWallet = FinanceWalletModel::create([
-			'description' => 'teste',
+			'description' => 'carteira-teste-01',
 			'panel' => 1,
 			'user_id' => $user->id,
 		]);
