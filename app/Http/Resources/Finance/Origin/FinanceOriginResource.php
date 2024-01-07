@@ -6,12 +6,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class FinanceOriginResource extends JsonResource
 {
-	/**
-	 * Transform the resource into an array.
-	 *
-	 * @param  \Illuminate\Http\Request  $request
-	 * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-	 */
 	public function toArray($request)
 	{
 		$type = !!$this->type
@@ -35,7 +29,7 @@ class FinanceOriginResource extends JsonResource
 			'parent'      => $parent,
 			// 'wallet_id'   => $this->wallet_id,
 			'wallet'      => $wallet,
-			"trashed"			=> !!$this->deleted_at
+			"trashed"			=> (bool) $this->deleted_at
 		];
 
 		return $data;

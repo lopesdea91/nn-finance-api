@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\Finance\{
-	Origin\FinanceOriginCollection,
+	Origin\FinanceOriginResource,
 	OriginType\FinanceOriginTypeCollection,
 	Status\FinanceStatusCollection,
 	Tag\FinanceTagCollection,
@@ -89,7 +89,7 @@ class FinanceService
 		$data['wallet']       	= new FinanceWalletCollection($wallet);
 		// $data['group']        = [];
 		// $data['category']     = [];
-		$data['origin']       	= new FinanceOriginCollection($origin);
+		$data['origin']       	= FinanceOriginResource::collection($origin);
 		$data['tag']       			= new FinanceTagCollection($tag);
 		$data['type']         	= new FinanceTypeCollection($typeAll);
 		$data['status']       	= new FinanceStatusCollection($statusAll);

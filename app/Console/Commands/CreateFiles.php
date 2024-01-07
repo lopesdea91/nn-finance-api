@@ -63,7 +63,7 @@ class CreateFiles extends Command
         Artisan::call('make:request Finance/Origin/FinanceOriginStoreRequest');
         Artisan::call('make:request Finance/Origin/FinanceOriginUpdateRequest');
         Artisan::call('make:resource Finance/Origin/FinanceOriginResource');
-        Artisan::call('make:resource Finance/Origin/FinanceOriginCollection');
+        Artisan::call('make:resource Finance/Origin/FinanceOriginPageResource');
 
         Artisan::call('make:request Finance/Group/FinanceGroupStoreRequest');
         Artisan::call('make:request Finance/Group/FinanceGroupUpdateRequest');
