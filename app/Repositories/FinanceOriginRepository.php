@@ -31,8 +31,15 @@ class FinanceOriginRepository
     $search = $this->formatSearch($search);
 
     return $this->query($search['fields'])
-      ->orderByRaw("{$search['filter']['_order']} {$search['filter']['_sort']}")
-      ->paginate((int) $search['filter']['_limit']);
+    ->orderByRaw(
+      "{$search['filter']['_order']} {$search['filter']['_sort']}"
+    )
+    ->paginate(
+      (int) $search['filter']['_limit'],
+      ['*'],
+      '_page',
+      (int) $search['filter']['_page']
+    );
   }
   public function create($fields)
   {
@@ -60,7 +67,7 @@ class FinanceOriginRepository
   // others
   public function has($id)
   {
-    return $this->financeOriginModel->exists($id);
+    return (bool) $this->financeOriginModel->withTrashed()->select('id')->find($id);
   }
   public function findDelete($id)
   {
@@ -117,6 +124,7 @@ class FinanceOriginRepository
         '_sort'       => $search['_sort']     ?? 'asc',
         '_order'      => $search['_order']    ?? 'description',
         '_limit'      => $search['_limit']    ?? '15',
+        '_page'       => $search['_page']     ?? '1',
       ]), // 'ucfirst')
       'fields' => array_filter([
         'description' => $search['_q']        ?? null,

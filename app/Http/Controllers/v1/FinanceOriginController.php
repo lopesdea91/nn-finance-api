@@ -24,6 +24,7 @@ class FinanceOriginController
 				'_sort',
 				'_order',
 				'_limit',
+				'_page',
 				'_trashed',
 				// filter 
 				'type_id',
@@ -175,7 +176,6 @@ class FinanceOriginController
 
 		return response()->json($rtn, $sts);
 	}
-
 	public function restore($id, FinanceOriginRepository $financeOriginRepository)
 	{
 		if (!$financeOriginRepository->has($id))
