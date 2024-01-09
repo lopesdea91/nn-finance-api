@@ -4,7 +4,7 @@ namespace App\Http\Resources\Finance\Wallet;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FinanceWalletResource extends JsonResource
+class FinanceWalletListResource extends JsonResource
 {
 	public function toArray($request)
 	{
@@ -12,7 +12,6 @@ class FinanceWalletResource extends JsonResource
 			'id'            => $this->id,
 			'description'   => $this->description,
 			'panel'         => intval($this->panel),
-			"trashed"				=> !!$this->deleted_at
 		];
 	}
 }

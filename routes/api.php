@@ -32,7 +32,7 @@ include('api-others.php');
 Route::prefix('v1')->group(function () {
 	include('api-v1/api-auth.php');
 
-	Route::middleware('auth:sanctum')->group(function () {
+	Route::middleware(['auth:sanctum'])->group(function () {
 		include('api-v1/api-user.php');
 
 		Route::prefix('finance')->group(function () {
@@ -43,7 +43,9 @@ Route::prefix('v1')->group(function () {
 			include('api-v1/api-finance-origin.php');
 			include('api-v1/api-finance-tag.php');
 			include('api-v1/api-finance-wallet.php');
+			include('api-v1/api-finance-wallet-composition.php');
 			include('api-v1/api-finance-wallet-consolidation.php');
+			include('api-v1/api-finance-wallet-period.php');
 			include('api-v1/api-finance.php');
 		});
 	});
