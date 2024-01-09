@@ -2,19 +2,31 @@
 
 namespace App\Http\Controllers\v1;
 
-use App\Http\Resources\Finance\Status\FinanceStatusResource;
-use App\Models\FinanceStatusModel;
+use App\Http\Resources\Finance\Status\FinanceStatusListResource;
+use App\Repositories\FinanceStatusRepository;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class FinanceStatusController
 {
-	public function all()
+	public function get(Request $request, FinanceStatusRepository $financeStatusRepository)
 	{
 		try {
-			$all = FinanceStatusModel::select('id', 'description')->get();
+			$search = $request->only([
+				'_q',
+			]);
 
-			$rtn = FinanceStatusResource::collection($all);
-			$sts = Response::HTTP_OK;
+			$data = FinanceStatusListResource::collection($financeStatusRepository->get($search));
+
+			$hasContent = $data->count();
+
+			if ($hasContent) {
+				$rtn = $data;
+				$sts = Response::HTTP_OK;
+			} else {
+				$rtn = null;
+				$sts = Response::HTTP_NO_CONTENT;
+			}
 		} catch (\Throwable $e) {
 			$sts = Response::HTTP_FAILED_DEPENDENCY;
 			$rtn = ['message' => $e->getMessage()];
