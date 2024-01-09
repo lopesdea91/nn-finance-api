@@ -2,18 +2,31 @@
 
 namespace App\Http\Controllers\v1;
 
-use App\Http\Resources\Finance\OriginType\FinanceOriginTypeResource;
-use App\Models\FinanceOriginTypeModel;
+use App\Http\Resources\Finance\OriginType\FinanceOriginTypeListResource;
+use App\Repositories\FinanceOriginTypeRepository;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class FinanceOriginTypeController
 {
-	public function all()
+	public function get(Request $request, FinanceOriginTypeRepository $financeOriginTypeRepository)
 	{
 		try {
-			$all = FinanceOriginTypeModel::select('id', 'description')->get();
+			$search = $request->only([
+				'_q',
+			]);
 
-			$rtn = FinanceOriginTypeResource::collection($all);
+			$data = FinanceOriginTypeListResource::collection($financeOriginTypeRepository->get($search));
+
+			$hasContent = $data->count();
+
+			if ($hasContent) {
+				$rtn = $data;
+				$sts = Response::HTTP_OK;
+			} else {
+				$rtn = null;
+				$sts = Response::HTTP_NO_CONTENT;
+			}
 			$sts = Response::HTTP_OK;
 		} catch (\Throwable $e) {
 			$sts = Response::HTTP_FAILED_DEPENDENCY;
