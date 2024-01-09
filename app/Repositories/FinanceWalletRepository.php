@@ -74,7 +74,7 @@ class FinanceWalletRepository
     return $this->financeWalletModel->withTrashed()->select('id')->find($id);
   }
   // privates
-  private function query($search)
+  public function query($search)
   {
     $model = !!key_exists('deleted_at', $search)
       ? $this->financeWalletModel->onlyTrashed()

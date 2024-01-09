@@ -13,7 +13,7 @@ class FinanceOriginTypeRepository
     $this->financeOriginTypeModel = $financeOriginTypeModel;
   }
 
-  public function get($search)
+  public function get($search = [])
   {
     $search = $this->formatSearch($search);
 
